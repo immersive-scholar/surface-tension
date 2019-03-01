@@ -289,7 +289,7 @@
 		</script>
 
 		<script>
-
+      var move_point;
       var ValuesChanger;
       //var dataMouseSize;
 
@@ -381,7 +381,7 @@
 				var controls = new THREE.OrbitControls( camera, renderer.domElement );
 
 				stats = new Stats();
-				//container.appendChild( stats.dom ); //STATS TURNED OFF
+				container.appendChild( stats.dom ); //STATS TURNED OFF
 
 				document.addEventListener( 'mousemove', onDocumentMouseMove, false );
 				document.addEventListener( 'touchstart', onDocumentTouchStart, false );
@@ -503,54 +503,6 @@
 				material.defines.BOUNDS = BOUNDS.toFixed( 1 );
 
 				waterUniforms = material.uniforms;
-/*
-        var heartShape = new THREE.Shape();
-
-        var x = 0, y = 0;
-
-        var heartShape = new THREE.Shape();
-
-        heartShape.moveTo( x + 5, y + 5 );
-        heartShape.bezierCurveTo( x + 5, y + 5, x + 4, y, x, y );
-        heartShape.bezierCurveTo( x - 6, y, x - 6, y + 7,x - 6, y + 7 );
-        heartShape.bezierCurveTo( x - 6, y + 11, x - 3, y + 15.4, x + 5, y + 19 );
-        heartShape.bezierCurveTo( x + 12, y + 15.4, x + 16, y + 11, x + 16, y + 7 );
-        heartShape.bezierCurveTo( x + 16, y + 7, x + 16, y, x + 10, y );
-        heartShape.bezierCurveTo( x + 7, y, x + 5, y + 5, x + 5, y + 5 );
-
-        var geometry = new THREE.ShapeGeometry( heartShape );
-
-
-
-        var californiaPts = [];
-        				californiaPts.push( new THREE.Vector2( 610, 320 ) );
-        				californiaPts.push( new THREE.Vector2( 450, 300 ) );
-        				californiaPts.push( new THREE.Vector2( 392, 392 ) );
-        				californiaPts.push( new THREE.Vector2( 266, 438 ) );
-        				californiaPts.push( new THREE.Vector2( 190, 570 ) );
-        				californiaPts.push( new THREE.Vector2( 190, 600 ) );
-        				californiaPts.push( new THREE.Vector2( 160, 620 ) );
-        				californiaPts.push( new THREE.Vector2( 160, 650 ) );
-        				californiaPts.push( new THREE.Vector2( 180, 640 ) );
-        				californiaPts.push( new THREE.Vector2( 165, 680 ) );
-        				californiaPts.push( new THREE.Vector2( 150, 670 ) );
-        				californiaPts.push( new THREE.Vector2( 90, 737 ) );
-        				californiaPts.push( new THREE.Vector2( 80, 795 ) );
-        				californiaPts.push( new THREE.Vector2( 50, 835 ) );
-        				californiaPts.push( new THREE.Vector2( 64, 870 ) );
-        				californiaPts.push( new THREE.Vector2( 60, 945 ) );
-        				californiaPts.push( new THREE.Vector2( 300, 945 ) );
-        				californiaPts.push( new THREE.Vector2( 300, 743 ) );
-        				californiaPts.push( new THREE.Vector2( 600, 473 ) );
-        				californiaPts.push( new THREE.Vector2( 626, 425 ) );
-        				californiaPts.push( new THREE.Vector2( 600, 370 ) );
-        				californiaPts.push( new THREE.Vector2( 610, 320 ) );
-        				for ( var i = 0; i < californiaPts.length; i ++ ) californiaPts[ i ].multiplyScalar( 0.25 );
-        				var californiaShape = new THREE.Shape( californiaPts );
-
-*/
-
-
 
 				waterMesh = new THREE.Mesh( geometry, material );
 				waterMesh.rotation.x = - Math.PI / 2;
@@ -839,7 +791,6 @@
 					var intersects = raycaster.intersectObject( meshRay );
 
 					if ( intersects.length > 0 ) {
-
 					    var point = intersects[ 0 ].point;
               console.log(point.x+" "+point.z)
 					    uniforms[ "mousePos" ].value.set( point.x, point.z );
@@ -854,7 +805,14 @@
 
 				} else {
 
-					uniforms[ "mousePos" ].value.set( 10000, 10000 );
+					//uniforms[ "mousePos" ].value.set( 10000, 10000 );
+          //move_point = {x:parseInt(Math.random()*512-256),z:parseInt(Math.random()*512-256)}
+          var point = move_point;//intersects[ 0 ].point;
+          if (point != undefined) {
+            console.log(point.x+" "+point.z)
+            uniforms[ "mousePos" ].value.set( point.x, point.z );
+          }
+
 
 				}
 
@@ -890,13 +848,13 @@ var duk = setInterval(danky, 100);
     //D3 Projection
     <script>
 
-      var width = 1280;
-          height = 840;
+      var width = 960;
+          height = 600;
 
 
       var projection = d3.geo.albersUsa()
-        .translate([width/2, height/2])
-        .scale([1600]);
+        //.translate([width/2, height/2])
+        //.scale([1600]);
 
       var file = "data/us_states.csv";
       var the_data;
@@ -909,20 +867,32 @@ var duk = setInterval(danky, 100);
         }
       });
 
-/*
+      function convertRange( value, r1, r2 ) {
+          return ( value - r1[ 0 ] ) * ( r2[ 1 ] - r2[ 0 ] ) / ( r1[ 1 ] - r1[ 0 ] ) + r2[ 0 ];
+      }
+
       var bubbler = setInterval(function(){
         var rand_point = 1 + parseInt(Math.random()*(the_data.data.length-1));
-                    //console.log(coordies[0])
-        //rand_point = 10;
-        var coordies = projection([the_data.data[rand_point][2],the_data.data[rand_point][1]]);
-        //console.log(parseInt(coordies[1]))
-        //for (var i=0; i<100; i++) {
-          //setMouseCoords(parseInt(coordies[0]/4),parseInt(coordies[1]/4))
-        //}
-        setMouseCoords(parseInt(Math.random()*512),parseInt(Math.random()*512))
-        //console.log("F "+parseInt(coordies[0]/4)+" S "+parseInt(coordies[1]/4));
+
+        var coords = projection([the_data.data[rand_point][2],the_data.data[rand_point][1]]);
+
+        if (coords != null) {
+          var coordies = [];
+          coordies[0] = convertRange(coords[0], [0, width], [(BOUNDS/2-BOUNDS), BOUNDS/2]);
+          coordies[1] = convertRange(coords[1], [0, height], [(BOUNDS/2-BOUNDS)/(width/height), BOUNDS/2/(width/height)]);
+
+          //for (var i=0; i<100; i++) {
+            //setMouseCoords(parseInt(coordies[0]/4),parseInt(coordies[1]/4))
+          //}
+          if (coordies != null) {
+            move_point = {x:coordies[0],z:coordies[1]}
+          }
+        }
+
+
+
       }, 100)
-*/
+
 
     </script>
 	</body>
