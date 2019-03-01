@@ -406,7 +406,7 @@
 				var gui = new dat.GUI();
 
 				var effectController = {
-					mouseSize: 10.0,
+					mouseSize: 20.0,
 					viscosity: 0.99, //.999 is max
 					spheresEnabled: spheresEnabled
 				};
@@ -792,7 +792,7 @@
 
 					if ( intersects.length > 0 ) {
 					    var point = intersects[ 0 ].point;
-              console.log(point.x+" "+point.z)
+              //console.log(point.x+" "+point.z)
 					    uniforms[ "mousePos" ].value.set( point.x, point.z );
 
 					} else {
@@ -809,7 +809,7 @@
           //move_point = {x:parseInt(Math.random()*512-256),z:parseInt(Math.random()*512-256)}
           var point = move_point;//intersects[ 0 ].point;
           if (point != undefined) {
-            console.log(point.x+" "+point.z)
+            //console.log(point.x+" "+point.z)
             uniforms[ "mousePos" ].value.set( point.x, point.z );
           }
 
@@ -856,7 +856,7 @@ var duk = setInterval(danky, 100);
         //.translate([width/2, height/2])
         //.scale([1600]);
 
-      var file = "data/us_states.csv";
+      var file = "data/uscitiesv1.4.csv";//"data/us_states.csv";
       var the_data;
 
       Papa.parse(file, {
@@ -864,6 +864,28 @@ var duk = setInterval(danky, 100);
         complete: function(results){
           console.log("Finished:", results.data.length)
           the_data = results;
+
+          var bubbler = setInterval(function(){
+            var rand_point = 1 + parseInt(Math.random()*(the_data.data.length-1));
+
+            var coords = projection([the_data.data[rand_point][7],the_data.data[rand_point][6]]); //cities data //var coords = projection([the_data.data[rand_point][2],the_data.data[rand_point][1]]); //states data
+
+            if (coords != null) {
+              var coordies = [];
+              coordies[0] = convertRange(coords[0], [0, width], [(BOUNDS/2-BOUNDS), BOUNDS/2]);
+              coordies[1] = convertRange(coords[1], [0, height], [(BOUNDS/2-BOUNDS)/(width/height), BOUNDS/2/(width/height)]);
+
+              //for (var i=0; i<100; i++) {
+                //setMouseCoords(parseInt(coordies[0]/4),parseInt(coordies[1]/4))
+              //}
+              if (coordies != null) {
+                move_point = {x:coordies[0],z:coordies[1]}
+              }
+            }
+
+
+
+          }, 50)
         }
       });
 
@@ -871,27 +893,7 @@ var duk = setInterval(danky, 100);
           return ( value - r1[ 0 ] ) * ( r2[ 1 ] - r2[ 0 ] ) / ( r1[ 1 ] - r1[ 0 ] ) + r2[ 0 ];
       }
 
-      var bubbler = setInterval(function(){
-        var rand_point = 1 + parseInt(Math.random()*(the_data.data.length-1));
 
-        var coords = projection([the_data.data[rand_point][2],the_data.data[rand_point][1]]);
-
-        if (coords != null) {
-          var coordies = [];
-          coordies[0] = convertRange(coords[0], [0, width], [(BOUNDS/2-BOUNDS), BOUNDS/2]);
-          coordies[1] = convertRange(coords[1], [0, height], [(BOUNDS/2-BOUNDS)/(width/height), BOUNDS/2/(width/height)]);
-
-          //for (var i=0; i<100; i++) {
-            //setMouseCoords(parseInt(coordies[0]/4),parseInt(coordies[1]/4))
-          //}
-          if (coordies != null) {
-            move_point = {x:coordies[0],z:coordies[1]}
-          }
-        }
-
-
-
-      }, 100)
 
 
     </script>
