@@ -6,13 +6,14 @@
  <body>
  <?php
    echo '<h1>USGS Surfacewater Data Cacher</h1>';
+   echo "\n";
 
    $data_dir = '/app/data';
    $filepath = $data_dir.'/realtime-surfacewater-'.date("Y-m-d").'.csv';
 
    $tempdata = $data_dir.'/temp.csv';
-   echo '<h2>Scanning for:</h2>';
-   echo '<h3>'.$filepath.'</h3>';
+   echo '<h2>Scanning for:</h2>';echo "\n";
+   echo '<h3>'.$filepath.'</h3>';echo "\n";
 
   //does the file for today exist?
 
@@ -23,12 +24,12 @@
   clearstatcache();
 
   if (file_exists('.'.$filepath)) {
-      echo "<h3><span class='good'>Cached data for today was found.</span></h3>";
+      echo "<h3><span class='good'>Cached data for today was found.</span></h3>";echo "\n";
       //load visualization and pass it this file's name as a parameter;
       //*******************************************************************************************************************************************************************************
       load_viz($filepath);
   } else {
-      echo "<h3>No cached data for today.</h3>";
+      echo "<h3>No cached data for today.</h3>";echo "\n";
       //load the file from usgs.
       //if response code is 200, cache this file and load vis with this file as parameter
       //if response is not 200, don't cache the file and load vis with a previously cached file as ReflectionParameter
@@ -69,7 +70,7 @@
       echo $url;
       //show only if there is something to show e.g. 404 barf
       if ($http_respond != "") {
-        echo '<p><b>http_respond:</b> '.$http_respond.'</p>';
+        echo '<p><b>http_respond:</b> '.$http_respond.'</p>';echo "\n";
       }
 
       if ($http_code != "200") echo "<span class='bad'>";
@@ -116,6 +117,10 @@
   }
   function load_viz($pathy){
         echo "<a href='".$pathy."'>".$pathy."</a>";
+        echo "\n\n</body>";
+        echo "\n<script>setTimeout(function(){
+          window.location.href = 'app/viz.html?data=".$pathy."';
+        }, 3000)</script>";
   }
  ?>
  </body>
