@@ -2,15 +2,19 @@ body {
   background-color:       #fff;
   font-family:            Arial, Helvetica, sans-serif, sans-serif;
   float:                  left;
-  font-size:              200%;
+  font-size:              150%;
   color:                  #7A7A7A;
-  line-height: 2em;
-  margin: 3em;
+  line-height: 1em;
+  margin: 2em;
 }
 
-a {
-  color:                  #FF5D5D;
+a, span.good {
+  color:                  MediumSeaGreen;
   text-decoration:        none;
+}
+
+span.bad {
+  color:                  OrangeRed;
 }
 
 #MainNav a {
@@ -18,9 +22,8 @@ a {
 }
 
 p {
-  line-height:            1.3em;
   font-weight:            100;
-  margin:                 1em 0 3em 0;
+  margin:                 1em 0 2em 0;
 }
 
 img {
@@ -30,13 +33,11 @@ img {
 h1 {
   font-weight:            600;
   font-size:              1.6em;
-  line-height:            1em;
 }
 
 h2 {
   font-weight:            100;
   font-size:              1em;
-  line-height:            1.2em;
   font-style:             italic;
 }
 
