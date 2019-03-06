@@ -372,11 +372,11 @@
 
 				scene = new THREE.Scene();
 
-				var sun = new THREE.DirectionalLight( 0xFFFFFF, 1 );
+				var sun = new THREE.DirectionalLight( 0x2DFF39, .6 );
 				sun.position.set( 300, 400, 175 );
 				scene.add( sun );
 
-				var sun2 = new THREE.DirectionalLight( 0xB5FF54, .8 ); //0xFFF272
+				var sun2 = new THREE.DirectionalLight( 0xFFFFFF, 1 ); //0xFFF272
 				sun2.position.set( - 100, 350, - 200 );
 				scene.add( sun2 );
 
@@ -461,7 +461,7 @@
 
 			function initWater() {
 
-				var materialColor = 0xffffff;
+
 
 				var geometry = new THREE.PlaneBufferGeometry( BOUNDS, BOUNDS, WIDTH - 1, WIDTH - 1 );
 
@@ -486,24 +486,45 @@
         } );
         var textureLoader = new THREE.TextureLoader( loadingManager );
 
-        var skin_texture = textureLoader.load( "textures/skin/Skin_W_Map2.jpg" );
+        var skin_texture = textureLoader.load( "textures/skin/Skin_skintone_W_Map.jpg" );
 
         //var skin_texture = new THREE.TextureLoader().load( "textures/skin/httpwww.photos-public-domain.com20110929skin_512x512.jpg" );
 
+
+				var mapHeight = textureLoader.load( "textures/skin/Skin_W_Map2_bump.jpg" );
+
+        mapHeight.anisotropy = 4;
+        mapHeight.wrapS = mapHeight.wrapT = THREE.RepeatWrapping;
+        mapHeight.format = THREE.RGBFormat;
+
+
+        var mapSpecular = textureLoader.load( "models/gltf/LeePerrySmith/Map-SPEC.jpg" );
+        var mapSpecular = textureLoader.load( "textures/skin/Skin_W_Map2_specular.jpg" );
+
+        mapSpecular.anisotropy = 4;
+        mapSpecular.wrapS = mapSpecular.wrapT = THREE.RepeatWrapping;
+        mapSpecular.format = THREE.RGBFormat;
+
+        var materialColor = 0xADB4FF;
+
 				// Material attributes from MeshPhongMaterial
 				material.color = new THREE.Color( materialColor );
-				material.specular = new THREE.Color( 0x111111 );
+				material.specular = new THREE.Color( 0xFFF272 );
 				material.shininess = 10;
         material.map = skin_texture;
         material.transparent = true;
+        material.bumpMap = mapHeight;
+        material.specularMap = mapSpecular;
 
 
 				// Sets the uniforms with the material values
 				material.uniforms[ "diffuse" ].value = material.color;
-				material.uniforms[ "specular" ].value = material.specular;
+				//material.uniforms[ "specular" ].value = material.specular;
 				material.uniforms[ "shininess" ].value = Math.max( material.shininess, 1e-4 );
 				material.uniforms[ "opacity" ].value = 1;//material.opacity;
         material.uniforms[ "map" ].value = skin_texture;
+        material.uniforms[ "bumpMap" ].value = mapHeight;
+        //material.uniforms["specularMap"].value = mapSpecular;
 
 				// Defines
 				material.defines.WIDTH = WIDTH.toFixed( 1 );
@@ -914,6 +935,7 @@ var duk = setInterval(danky, 100);
 
 
           }, 50)
+
         }
       });
 
