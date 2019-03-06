@@ -293,6 +293,13 @@
       var ValuesChanger;
       //var dataMouseSize;
 
+      //https://stackoverflow.com/questions/831030/how-to-get-get-request-parameters-in-javascript
+      function get_url_params(name){
+         if(name=(new RegExp('[?&]'+encodeURIComponent(name)+'=([^&]*)')).exec(location.search))
+            return decodeURIComponent(name[1]);
+      }
+
+
 			if ( WEBGL.isWebGLAvailable() === false ) {
 
 				document.body.appendChild( WEBGL.getWebGLErrorMessage() );
@@ -365,11 +372,11 @@
 
 				scene = new THREE.Scene();
 
-				var sun = new THREE.DirectionalLight( 0xFFFFFF, 1.0 );
+				var sun = new THREE.DirectionalLight( 0xFFF272, 1.0 );
 				sun.position.set( 300, 400, 175 );
 				scene.add( sun );
 
-				var sun2 = new THREE.DirectionalLight( 0x40A040, 0.6 );
+				var sun2 = new THREE.DirectionalLight( 0xFFFFFF, .6 );
 				sun2.position.set( - 100, 350, - 200 );
 				scene.add( sun2 );
 
@@ -479,7 +486,7 @@
         } );
         var textureLoader = new THREE.TextureLoader( loadingManager );
 
-        var skin_texture = textureLoader.load( "textures/skin/Skin_tiled_blue_2048.jpg" );
+        var skin_texture = textureLoader.load( "textures/skin/Skin_W_Map2.jpg" );
 
         //var skin_texture = new THREE.TextureLoader().load( "textures/skin/httpwww.photos-public-domain.com20110929skin_512x512.jpg" );
 
@@ -856,8 +863,11 @@ var duk = setInterval(danky, 100);
         //.translate([width/2, height/2])
         //.scale([1600]);
 
-      var file = "data/uscitiesv1.4.csv";//"data/us_states.csv";
+      var file = get_url_params("data");
+      if (file == undefined)  var file = "data/uscitiesv1.4.csv";//"data/us_states.csv";
+
       var the_data;
+
 
       Papa.parse(file, {
         download: true,
@@ -865,10 +875,20 @@ var duk = setInterval(danky, 100);
           console.log("Finished:", results.data.length)
           the_data = results;
 
+          var stage_max = 0.0; //if using guage height aka 'stage' and not percentile, we need to figure out comparative percentage of stage so need stage max
+          for (var i=1; i<the_data.data.length; i++) {
+            stage_max = parseFloat(the_data.data[i][9]) > stage_max ? the_data.data[i][9] : stage_max;
+          }
+
+          console.log("STAAGE MAX");
+          console.log(stage_max);
+
+
           var bubbler = setInterval(function(){
             var rand_point = 1 + parseInt(Math.random()*(the_data.data.length-1));
-
-            var coords = projection([the_data.data[rand_point][7],the_data.data[rand_point][6]]); //cities data //var coords = projection([the_data.data[rand_point][2],the_data.data[rand_point][1]]); //states data
+            var coords = projection([the_data.data[rand_point][3],the_data.data[rand_point][2]]);
+            //cities data
+            //var coords = projection([the_data.data[rand_point][7],the_data.data[rand_point][6]]); //states data //var coords = projection([the_data.data[rand_point][2],the_data.data[rand_point][1]]);
 
             if (coords != null) {
               var coordies = [];
@@ -878,7 +898,15 @@ var duk = setInterval(danky, 100);
               //for (var i=0; i<100; i++) {
                 //setMouseCoords(parseInt(coordies[0]/4),parseInt(coordies[1]/4))
               //}
+              //Percentile (historical per site I believe)
+              var new_blobby = parseFloat(the_data.data[rand_point][13]);
+
+              //Relative percentale of stage
+              //var new_blobby = parseFloat(the_data.data[rand_point][9])/stage_max *80.0 + 20;
+              //console.log(new_blobby);
               if (coordies != null) {
+
+                if (new_blobby != undefined && new_blobby != null && !isNaN(new_blobby) && new_blobby >= 0.0) valuesChanger(new_blobby);
                 move_point = {x:coordies[0],z:coordies[1]}
               }
             }
