@@ -502,7 +502,7 @@
         // first two give it a veiny look somehow
         material.emissive = new THREE.Color( 0x85702F );
         material.emissiveMap = mapSpecular;
-        //material.emissiveIntensity = 0.1;
+        material.emissiveIntensity = 0.1;
 
 
         // Weird skin texture
@@ -531,7 +531,7 @@
 
         material.uniforms[ "emissive" ].value = material.emissive;
         //material.uniforms["emissiveIntensity"].value = 1;
-        //material.uniforms[ "emissiveMap" ].value = material.emissiveMap;
+        material.uniforms[ "emissiveMap" ].value = material.emissiveMap;
 
         material.uniforms[ "map" ].value = material.map;
 
@@ -911,13 +911,12 @@ var duk = setInterval(danky, 100);
           console.log("Finished:", results.data.length)
           the_data = results;
 
+/*
           var stage_max = 0.0; //if using guage height aka 'stage' and not percentile, we need to figure out comparative percentage of stage so need stage max
           for (var i=1; i<the_data.data.length; i++) {
             stage_max = parseFloat(the_data.data[i][9]) > stage_max ? the_data.data[i][9] : stage_max;
           }
-
-          console.log("STAAGE MAX");
-          console.log(stage_max);
+*/
 
 
           var bubbler = setInterval(function(){
