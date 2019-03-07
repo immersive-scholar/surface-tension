@@ -1,5 +1,6 @@
 .DS_Store
 models
+webgl_*
 
 # Logs
 logs
