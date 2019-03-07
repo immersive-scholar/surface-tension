@@ -893,11 +893,14 @@ var duk = setInterval(danky, 100);
 
       var width = 960;
           height = 600;
+          scaler = 800;
+          default_scaler = 1000; //not sure why the heck d3 has default scaling value at 1000?
 
 
       var projection = d3.geo.albersUsa()
+          .scale([scaler]);
         //.translate([width/2, height/2])
-        //.scale([1600]);
+
 
       var file = get_url_params("data");
       if (file == undefined)  var file = "data/uscitiesv1.4.csv";//"data/us_states.csv";
@@ -934,7 +937,7 @@ var duk = setInterval(danky, 100);
                 //setMouseCoords(parseInt(coordies[0]/4),parseInt(coordies[1]/4))
               //}
               //Percentile (historical per site I believe)
-              var new_blobby = parseFloat(the_data.data[rand_point][13]);
+              var new_blobby = parseFloat(the_data.data[rand_point][13])-(100-(scaler/default_scaler*100));
 
               //Relative percentale of stage
               //var new_blobby = parseFloat(the_data.data[rand_point][9])/stage_max *80.0 + 20;
