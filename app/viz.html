@@ -367,8 +367,18 @@
 				container = document.createElement( 'div' );
 				document.body.appendChild( container );
 
-				camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 3000 );
-				camera.position.set( 0, 200, 350 );
+        var zoom_margin = 20;
+        // Calculate the camera distance https://stackoverflow.com/questions/14614252/how-to-fit-camera-to-object
+        var dist = 200;
+        var hheight = BOUNDS;
+        var wwidth = BOUNDS - zoom_margin;
+        //var fov = 2 * Math.atan( hheight / ( 2 * dist ) ) * ( 180 / Math.PI ); //to height
+        var fov = 2 * Math.atan( ( wwidth / (window.innerWidth / window.innerHeight) ) / ( 2 * dist ) ) * ( 180 / Math.PI ); // in degrees
+
+        camera = new THREE.PerspectiveCamera( fov, window.innerWidth / window.innerHeight, 1, 3000 );
+        camera.position.set( 0, dist, 0 );
+
+        //camera.updateProjectionMatrix();
 
 				scene = new THREE.Scene();
 
@@ -489,7 +499,7 @@
 
 
         //  var mapSpecular = textureLoader.load( "models/gltf/LeePerrySmith/Map-SPEC.jpg" );
-        var mapSpecular = textureLoader.load( "textures/skin/Skin_W_Map2_specular.jpg" );
+        var mapSpecular = textureLoader.load( "textures/skin/Skin_Map_low_Saturation_Shadow_3_7_2019_specular.jpg" );
         mapSpecular.anisotropy = 4;
         mapSpecular.wrapS = mapSpecular.wrapT = THREE.RepeatWrapping;
         mapSpecular.format = THREE.RGBFormat;
@@ -506,13 +516,14 @@
 
 
         // Weird skin texture
-        var skin_texture = textureLoader.load( "textures/skin/Skin_skintone_W_Map.jpg" );
+        var skin_texture = textureLoader.load( "textures/skin/Skin_Map_Low_Saturation_3_7_2019.jpg" );
+        //var skin_texture = textureLoader.load( "textures/skin/Skin_skintone_W_Map.jpg" );
         //var skin_texture = new THREE.TextureLoader().load( "textures/skin/httpwww.photos-public-domain.com20110929skin_512x512.jpg" );
         material.map = skin_texture;
 
 
         //Bump map for skin texture
-        var mapHeight = textureLoader.load( "textures/skin/Skin_W_Map2_bump.jpg" );
+        var mapHeight = textureLoader.load( "textures/skin/Skin_Map_low_Saturation_Shadow_3_7_2019_bump.jpg" );
         mapHeight.anisotropy = 4;
         mapHeight.wrapS = mapHeight.wrapT = THREE.RepeatWrapping;
         mapHeight.format = THREE.RGBFormat;
@@ -772,6 +783,9 @@
 				camera.updateProjectionMatrix();
 
 				renderer.setSize( window.innerWidth, window.innerHeight );
+        console.log("DSFDF");
+        console.log(window.innerWidth)
+        console.log(window.innerHeight)
 
 			}
 
@@ -888,8 +902,8 @@
 
 
       var projection = d3.geo.albersUsa()
-          .scale([scaler]);
-        //.translate([width/2, height/2])
+          .scale([scaler])
+          .translate([width/2, height/2]);
 
 
       var file = get_url_params("data");
