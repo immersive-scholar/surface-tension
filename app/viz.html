@@ -479,52 +479,67 @@
 				} );
 
 				material.lights = true;
-
-        // Weird skin texture
-
         var loadingManager = new THREE.LoadingManager( function () {
         } );
         var textureLoader = new THREE.TextureLoader( loadingManager );
 
-        var skin_texture = textureLoader.load( "textures/skin/Skin_skintone_W_Map.jpg" );
 
-        //var skin_texture = new THREE.TextureLoader().load( "textures/skin/httpwww.photos-public-domain.com20110929skin_512x512.jpg" );
-
-
-				var mapHeight = textureLoader.load( "textures/skin/Skin_W_Map2_bump.jpg" );
-
-        mapHeight.anisotropy = 4;
-        mapHeight.wrapS = mapHeight.wrapT = THREE.RepeatWrapping;
-        mapHeight.format = THREE.RGBFormat;
+				// Material attributes from MeshPhongMaterial, correlates to 'diffuse' in uniforms settings
+				material.color = new THREE.Color( 0xADB4FF );
 
 
-        var mapSpecular = textureLoader.load( "models/gltf/LeePerrySmith/Map-SPEC.jpg" );
+        //  var mapSpecular = textureLoader.load( "models/gltf/LeePerrySmith/Map-SPEC.jpg" );
         var mapSpecular = textureLoader.load( "textures/skin/Skin_W_Map2_specular.jpg" );
-
         mapSpecular.anisotropy = 4;
         mapSpecular.wrapS = mapSpecular.wrapT = THREE.RepeatWrapping;
         mapSpecular.format = THREE.RGBFormat;
-
-        var materialColor = 0xADB4FF;
-
-				// Material attributes from MeshPhongMaterial
-				material.color = new THREE.Color( materialColor );
-				material.specular = new THREE.Color( 0xFFF272 );
-				material.shininess = 10;
-        material.map = skin_texture;
-        material.transparent = true;
-        material.bumpMap = mapHeight;
+        //material.specular = new THREE.Color( 0x473C41 );
+        material.shininess = 10;
         material.specularMap = mapSpecular;
+
+
+        //Emissive settings, though intensity doesn't seem to do anything.
+        // first two give it a veiny look somehow
+        material.emissive = new THREE.Color( 0x85702F );
+        material.emissiveMap = mapSpecular;
+        //material.emissiveIntensity = 0.1;
+
+
+        // Weird skin texture
+        var skin_texture = textureLoader.load( "textures/skin/Skin_skintone_W_Map.jpg" );
+        //var skin_texture = new THREE.TextureLoader().load( "textures/skin/httpwww.photos-public-domain.com20110929skin_512x512.jpg" );
+        material.map = skin_texture;
+
+
+        //Bump map for skin texture
+        var mapHeight = textureLoader.load( "textures/skin/Skin_W_Map2_bump.jpg" );
+        mapHeight.anisotropy = 4;
+        mapHeight.wrapS = mapHeight.wrapT = THREE.RepeatWrapping;
+        mapHeight.format = THREE.RGBFormat;
+        material.bumpMap = mapHeight;
+
+        material.transparent = false;
+
 
 
 				// Sets the uniforms with the material values
 				material.uniforms[ "diffuse" ].value = material.color;
-				//material.uniforms[ "specular" ].value = material.specular;
-				material.uniforms[ "shininess" ].value = Math.max( material.shininess, 1e-4 );
-				material.uniforms[ "opacity" ].value = 1;//material.opacity;
-        material.uniforms[ "map" ].value = skin_texture;
-        material.uniforms[ "bumpMap" ].value = mapHeight;
-        //material.uniforms["specularMap"].value = mapSpecular;
+
+        //material.uniforms[ "specular" ].value = material.specular;
+        material.uniforms[ "shininess" ].value = Math.max( material.shininess, 1e-4 );
+        //material.uniforms["specularMap"].value = material.specularMap;
+
+        material.uniforms[ "emissive" ].value = material.emissive;
+        //material.uniforms["emissiveIntensity"].value = 1;
+        //material.uniforms[ "emissiveMap" ].value = material.emissiveMap;
+
+        material.uniforms[ "map" ].value = material.map;
+
+        material.uniforms[ "bumpMap" ].value = material.bumpMap;
+
+        //material.uniforms[ "opacity" ].value = 1;//material.opacity;
+
+
 
 				// Defines
 				material.defines.WIDTH = WIDTH.toFixed( 1 );
