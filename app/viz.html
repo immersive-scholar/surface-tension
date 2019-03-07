@@ -876,19 +876,9 @@
 
 			}
 
-        //Random undulations
-        /*
-
-valuesChanger(100);
-undefined
-danky = function() {setMouseCoords(400+parseInt(Math.random()*400),200+parseInt(Math.random()*200))}
-ƒ () {setMouseCoords(400+parseInt(Math.random()*400),200+parseInt(Math.random()*200))}
-var duk = setInterval(danky, 100);
-*/
-
 		</script>
 
-    //D3 Projection
+    //D3 Map Projection
     <script>
 
       var width = 960;
@@ -933,9 +923,6 @@ var duk = setInterval(danky, 100);
               coordies[0] = convertRange(coords[0], [0, width], [(BOUNDS/2-BOUNDS), BOUNDS/2]);
               coordies[1] = convertRange(coords[1], [0, height], [(BOUNDS/2-BOUNDS)/(width/height), BOUNDS/2/(width/height)]);
 
-              //for (var i=0; i<100; i++) {
-                //setMouseCoords(parseInt(coordies[0]/4),parseInt(coordies[1]/4))
-              //}
               //Percentile (historical per site I believe)
               var new_blobby = parseFloat(the_data.data[rand_point][13])-(100-(scaler/default_scaler*100));
 
