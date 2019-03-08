@@ -783,9 +783,7 @@
 				camera.updateProjectionMatrix();
 
 				renderer.setSize( window.innerWidth, window.innerHeight );
-        console.log("DSFDF");
-        console.log(window.innerWidth)
-        console.log(window.innerHeight)
+      
 
 			}
 
@@ -938,7 +936,7 @@
               coordies[1] = convertRange(coords[1], [0, height], [(BOUNDS/2-BOUNDS)/(width/height), BOUNDS/2/(width/height)]);
 
               //Percentile (historical per site I believe)
-              var new_blobby = parseFloat(the_data.data[rand_point][13])-(100-(scaler/default_scaler*100));
+              var new_blobby = parseFloat(the_data.data[rand_point][13])-1.5*(100-(scaler/default_scaler*100));
 
               //Relative percentale of stage
               //var new_blobby = parseFloat(the_data.data[rand_point][9])/stage_max *80.0 + 20;
@@ -949,9 +947,6 @@
                 move_point = {x:coordies[0],z:coordies[1]}
               }
             }
-
-
-
           }, 50)
 
         }
