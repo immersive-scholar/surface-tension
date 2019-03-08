@@ -497,24 +497,26 @@
 
 
 				// Material attributes from MeshPhongMaterial, correlates to 'diffuse' in uniforms settings
-				material.color = new THREE.Color( 0xADB4FF );
+				material.color = new THREE.Color( 0xEBC4FF);// FFB0C0 );
 
 
-        //  var mapSpecular = textureLoader.load( "models/gltf/LeePerrySmith/Map-SPEC.jpg" );
+        //This is where faces could go
         var mapSpecular = textureLoader.load( "textures/skin/Skin_Map_low_Saturation_Shadow_3_7_2019_specular.jpg" );
+        //var mapSpecular = textureLoader.load( "models/gltf/LeePerrySmith/Map-SPEC.jpg" );
         mapSpecular.anisotropy = 4;
         mapSpecular.wrapS = mapSpecular.wrapT = THREE.RepeatWrapping;
         mapSpecular.format = THREE.RGBFormat;
-        //material.specular = new THREE.Color( 0x473C41 );
+        material.specular = new THREE.Color( 0x473C41 );
         material.shininess = 10;
         material.specularMap = mapSpecular;
 
 
         //Emissive settings, though intensity doesn't seem to do anything.
         // first two give it a veiny look somehow
-        material.emissive = new THREE.Color( 0x85702F );
-        material.emissiveMap = mapSpecular;
-        material.emissiveIntensity = 0.1;
+        var mapEmissive = textureLoader.load( "textures/skin/Skin_Map_low_Saturation_Shadow_3_7_2019_specular.jpg" );
+        material.emissive = new THREE.Color( 0x4286A6);//85702F );
+        material.emissiveMap = mapEmissive;
+
 
 
         // Weird skin texture
@@ -557,7 +559,6 @@
         //material.uniforms["specularMap"].value = material.specularMap;
 
         material.uniforms[ "emissive" ].value = material.emissive;
-        //material.uniforms["emissiveIntensity"].value = 1;
         material.uniforms[ "emissiveMap" ].value = material.emissiveMap;
 
         material.uniforms[ "map" ].value = material.map;
