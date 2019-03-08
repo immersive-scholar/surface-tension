@@ -292,11 +292,13 @@
       var move_point;
       var ValuesChanger;
       //var dataMouseSize;
-
+      var nn;
       //https://stackoverflow.com/questions/831030/how-to-get-get-request-parameters-in-javascript
       function get_url_params(name){
-         if(name=(new RegExp('[?&]'+encodeURIComponent(name)+'=([^&]*)')).exec(location.search))
-            return decodeURIComponent(name[1]);
+         if(name=(new RegExp('[?&]'+encodeURIComponent(name)+'=([^&]*)')).exec(location.search)) {
+           return decodeURIComponent(name[1]);
+         }
+
       }
 
 
@@ -516,7 +518,21 @@
 
 
         // Weird skin texture
-        var skin_texture = textureLoader.load( "textures/skin/Skin_Map_Low_Saturation_3_7_2019.jpg" );
+        //several test DIVERSIONS
+        switch(get_url_params("texture")) {
+          case "Skin_Map_Light_Blue_3_8_2019.jpg":
+            var skin_texture = textureLoader.load( "textures/skin/Skin_Map_Light_Blue_3_8_2019.jpg" );
+            break;
+          case "Skin_Map_Blue_3_8_2019.jpg":
+            var skin_texture = textureLoader.load( "textures/skin/Skin_Map_Blue_3_8_2019.jpg" );
+            break;
+          default:
+            var skin_texture = textureLoader.load( "textures/skin/Skin_Map_Low_Saturation_3_7_2019.jpg" );
+
+        }
+
+        //var skin_texture = textureLoader.load( "textures/skin/Skin_Map_Low_Saturation_3_7_2019.jpg" );
+
         //var skin_texture = textureLoader.load( "textures/skin/Skin_skintone_W_Map.jpg" );
         //var skin_texture = new THREE.TextureLoader().load( "textures/skin/httpwww.photos-public-domain.com20110929skin_512x512.jpg" );
         material.map = skin_texture;
@@ -783,7 +799,7 @@
 				camera.updateProjectionMatrix();
 
 				renderer.setSize( window.innerWidth, window.innerHeight );
-      
+
 
 			}
 
@@ -926,6 +942,9 @@
 
           var bubbler = setInterval(function(){
             var rand_point = 1 + parseInt(Math.random()*(the_data.data.length-1));
+            //Filter out noncontiguous US places Hawaii, Pureto Rico, and Alaska because we are showing a less abstract continental map vs just USA, and these places don't really appear in this map
+            //TODO filter out
+
             var coords = projection([the_data.data[rand_point][3],the_data.data[rand_point][2]]);
             //cities data
             //var coords = projection([the_data.data[rand_point][7],the_data.data[rand_point][6]]); //states data //var coords = projection([the_data.data[rand_point][2],the_data.data[rand_point][1]]);
