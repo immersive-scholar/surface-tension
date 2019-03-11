@@ -5,11 +5,11 @@
  </head>
  <body>
  <?php
-   echo '<h1>USGS Surfacewater Data Cacher</h1>';
+   echo '<h1>USGS Streamflow Data Cacher</h1>';
    echo "\n";
 
    $data_dir = '/app/data';
-   $filepath = $data_dir.'/realtime-surfacewater-'.date("Y-m-d").'.csv';
+   $filepath = $data_dir.'/realtime-streamflow-'.date("Y-m-d").'.csv';
 
    $tempdata = $data_dir.'/temp.csv';
    echo '<h2>Scanning for:</h2>';echo "\n";
@@ -98,14 +98,14 @@
       }
   }
   //scan_dir function based on https://stackoverflow.com/questions/11923235/scandir-to-sort-by-date-modified
-  //modified to filter out non surfacewater files and also only to return first file in array, i.e. last cached file
+  //modified to filter out non streamflow files and also only to return first file in array, i.e. last cached file
   function scan_dir($dir) {
       $ignored = array('.', '..', '.svn', '.htaccess');
 
       $files = array();
       foreach (scandir($dir) as $file) {
           if (in_array($file, $ignored)) continue;
-          if (strpos($file, 'surfacewater') !== false) {
+          if (strpos($file, 'streamflow') !== false) {
               $files[$file] = filemtime($dir . '/' . $file);
           }
       }
