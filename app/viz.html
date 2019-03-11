@@ -932,13 +932,30 @@
       if (file == undefined)  var file = "data/uscitiesv1.4.csv";//"data/us_states.csv";
 
       var the_data;
+      var the_data2;
 
 
       Papa.parse(file, {
         download: true,
         complete: function(results){
           console.log("Finished:", results.data.length)
-          the_data = results;
+
+
+          //Filter out noncontiguous US places Hawaii, Pureto Rico, and Alaska because we are showing a less abstract continental map vs just USA, and these places don't really appear in this map
+
+          function checker(value) {
+            var filtered_states = [", AK", ", PR", ", HI"];
+
+            for (var i = 0; i < filtered_states.length; i++) {
+              if (value[1] == undefined) return false;
+              if (value[1].indexOf(filtered_states[i]) > -1) {
+                return false;
+              }
+            }
+            return true;
+          }
+
+          the_data = {"data": results.data.filter(checker)};
 
           //TODO generisize this so we can try any parameter besides stage and percentile
 /*
@@ -951,8 +968,6 @@
 
           var bubbler = setInterval(function(){
             var rand_point = 1 + parseInt(Math.random()*(the_data.data.length-1));
-            //Filter out noncontiguous US places Hawaii, Pureto Rico, and Alaska because we are showing a less abstract continental map vs just USA, and these places don't really appear in this map
-            //TODO filter out
 
             var coords = projection([the_data.data[rand_point][3],the_data.data[rand_point][2]]);
             //cities data
