@@ -1,6 +1,8 @@
-.DS_Store
 models
 webgl_*
+app/data/temp.csv
+
+.DS_Store
 
 # Logs
 logs
