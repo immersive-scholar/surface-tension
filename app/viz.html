@@ -290,9 +290,9 @@
 
 		<script>
       var move_point;
-      var ValuesChanger;
+
       //var dataMouseSize;
-      var nn;
+
       //https://stackoverflow.com/questions/831030/how-to-get-get-request-parameters-in-javascript
       function get_url_params(name){
          if(name=(new RegExp('[?&]'+encodeURIComponent(name)+'=([^&]*)')).exec(location.search)) {
@@ -924,7 +924,7 @@
 
 
       var projection = d3.geo.albersUsa()
-          .scale([scaler])
+          .scale(scaler)
           .translate([width/2, height/2]);
 
 
@@ -932,8 +932,8 @@
       if (file == undefined)  var file = "data/uscitiesv1.4.csv";//"data/us_states.csv";
 
       var the_data;
-      var the_data2;
-
+      var bubbler;
+      var the_blobulator;
 
       Papa.parse(file, {
         download: true,
@@ -944,7 +944,7 @@
           //Filter out noncontiguous US places Hawaii, Pureto Rico, and Alaska because we are showing a less abstract continental map vs just USA, and these places don't really appear in this map
 
           function checker(value) {
-            var filtered_states = [", AK", ", PR", ", HI"];
+            var filtered_states = [", AK", " AK", ", PR", " PR", ", HI", " HI"];
 
             for (var i = 0; i < filtered_states.length; i++) {
               if (value[1] == undefined) return false;
@@ -954,8 +954,10 @@
             }
             return true;
           }
+          console.log("Results "+results.data.length);
 
           the_data = {"data": results.data.filter(checker)};
+            console.log("filtered results "+the_data.data.length)
 
           //TODO generisize this so we can try any parameter besides stage and percentile
 /*
@@ -964,9 +966,7 @@
             stage_max = parseFloat(the_data.data[i][9]) > stage_max ? the_data.data[i][9] : stage_max;
           }
 */
-
-
-          var bubbler = setInterval(function(){
+          the_blobulator = function(){
             var rand_point = 1 + parseInt(Math.random()*(the_data.data.length-1));
 
             var coords = projection([the_data.data[rand_point][3],the_data.data[rand_point][2]]);
@@ -988,9 +988,12 @@
 
                 if (new_blobby != undefined && new_blobby != null && !isNaN(new_blobby) && new_blobby >= 0.0) valuesChanger(new_blobby);
                 move_point = {x:coordies[0],z:coordies[1]}
+                console.log(rand_point+" "+the_data.data[rand_point][1])
               }
             }
-          }, 50)
+          }
+
+          bubbler = setInterval(the_blobulator, 1000)
 
         }
       });
