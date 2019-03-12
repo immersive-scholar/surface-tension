@@ -944,11 +944,12 @@
           //Filter out noncontiguous US places Hawaii, Pureto Rico, and Alaska because we are showing a less abstract continental map vs just USA, and these places don't really appear in this map
 
           function checker(value) {
-            var filtered_states = [", AK", " AK", ", PR", " PR", ", HI", " HI"];
+            var filtered_states =  [", AK", " AK", ", PR", " PR", ", HI", " HI"]; //only commas 202 are removed. if non comma filters are included, 549 are removed. Out of the 347 extra, how many are false positives? adding the slice(-4) to check only the ending part of site desciption for state abbreviation I get 327 filtered out, so 222 false positives restored by using slice
 
             for (var i = 0; i < filtered_states.length; i++) {
               if (value[1] == undefined) return false;
-              if (value[1].indexOf(filtered_states[i]) > -1) {
+              if (value[1].slice(-4).indexOf(filtered_states[i]) > -1) {
+                //if (value[1].indexOf(filtered_states[i]) < )
                 return false;
               }
             }
@@ -993,7 +994,7 @@
             }
           }
 
-          bubbler = setInterval(the_blobulator, 1000)
+          bubbler = setInterval(the_blobulator, 50)
 
         }
       });
