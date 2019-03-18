@@ -25,7 +25,7 @@ LogSlider.prototype = {
 
 
 // Usage:
-
+/*
 var logsl = new LogSlider({minpos:0, maxpos: 20, minval: 100, maxval: 10000000});
 
 $('#slider').on('change', function() {
@@ -39,3 +39,4 @@ $('#value').on('keyup', function() {
 });
 
 $('#value').val("1000").trigger("keyup");
+*/
