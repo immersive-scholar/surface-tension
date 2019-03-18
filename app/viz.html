@@ -503,7 +503,7 @@
 
 
         //This is where faces could go
-        var mapSpecular = textureLoader.load( "textures/skin/Skin_Map_low_Saturation_Shadow_3_7_2019_specular.jpg" );
+        var mapSpecular = textureLoader.load( "textures/skin/Skin_tiled_blue_2048.jpg" );
 
         //var mapSpecular = textureLoader.load( "models/gltf/LeePerrySmith/Map-SPEC.jpg" );
         mapSpecular.anisotropy = 4;
@@ -516,7 +516,7 @@
 
         //Emissive settings, though intensity doesn't seem to do anything.
         // first two give it a veiny look somehow
-        var mapEmissive = textureLoader.load( "textures/skin/Skin_Map_low_Saturation_Shadow_3_7_2019_specular.jpg" );
+        var mapEmissive = textureLoader.load( "textures/skin/Skin_tiled_blue_2048.jpg" );
         material.emissive = new THREE.Color( 0x85702F);//85702F this is the veiny one ); //latest with Caitlin 4286A6
         material.emissiveMap = mapEmissive;
 
@@ -538,7 +538,7 @@
           var skin_texture = textureLoader.load( "textures/skin/Skin_W_Map2.jpg" );
           break;
           default:
-          var skin_texture = textureLoader.load( "textures/skin/Skin_Map_Low_Saturation_3_7_2019.jpg" );
+          var skin_texture = textureLoader.load( "textures/skin/Skin_tiled_blue_2048.jpg" );
 
         }
 
@@ -550,7 +550,7 @@
 
 
         //Bump map for skin texture
-        var mapHeight = textureLoader.load( "textures/skin/Skin_Map_low_Saturation_Shadow_3_7_2019_bump.jpg" );
+        var mapHeight = textureLoader.load( "textures/skin/Skin_tiled_blue_2048.jpg" );
         mapHeight.anisotropy = 4;
         mapHeight.wrapS = mapHeight.wrapT = THREE.RepeatWrapping;
         mapHeight.format = THREE.RGBFormat;
@@ -567,8 +567,6 @@
         //material.uniforms[ "specular" ].value = material.specular;
         //material.uniforms["specularMap"].value = material.specularMap;
 
-        material.uniforms[ "emissive" ].value = material.emissive;
-        material.uniforms[ "emissiveMap" ].value = material.emissiveMap;
 
         material.uniforms[ "map" ].value = material.map;
 
@@ -986,44 +984,6 @@
           //Logarithmic scaling
           var logsl = new LogSlider({minval: column_data_min, maxval: column_data_max});
 
-          the_blobulator = function(){
-
-            var rand_point = 1 + parseInt(Math.random()*(the_data.data.length-1));
-
-            var coords = projection([the_data.data[rand_point][3],the_data.data[rand_point][2]]);
-            //cities data
-            if (file == "data/uscitiesv1.4.csv") {
-              var coords = projection([the_data.data[rand_point][7],the_data.data[rand_point][6]]);
-              //states data //var coords = projection([the_data.data[rand_point][2],the_data.data[rand_point][1]]);
-            }
-
-            if (coords != null && !isNaN(parseFloat(the_data.data[rand_point][streamflow_column]))) {
-              var coordies = [];
-              coordies[0] = convertRange(coords[0], [0, width], [(BOUNDS/2-BOUNDS), BOUNDS/2]);
-              coordies[1] = convertRange(coords[1], [0, height], [(BOUNDS/2-BOUNDS)/(width/height), BOUNDS/2/(width/height)]);
-
-              //logarithmic conversion
-              var new_blobby = logsl.logar(parseFloat(the_data.data[rand_point][streamflow_column]));
-              if (get_url_params("scaling") == "barebones") {
-                //barebones conversion
-                var new_blobby = parseFloat(the_data.data[rand_point][streamflow_column])/column_data_max * 100.0;//80.0 + 20;
-              }
-              if (get_url_params("scaling") == "full_range") {
-                //true range conversion
-                var new_blobby = convertRange(parseFloat(the_data.data[rand_point][streamflow_column]),[column_data_min, column_data_max], [0.0, 100.0]);
-              }
-
-
-              if (coordies != null) {
-
-                if (new_blobby != undefined && new_blobby != null && !isNaN(new_blobby) && new_blobby >= 0.0) valuesChanger(new_blobby);
-                move_point = {x:coordies[0],z:coordies[1]}
-
-              }
-            }
-          }
-
-          var bubbler = setInterval(the_blobulator, 1000)
 
         }
       });
