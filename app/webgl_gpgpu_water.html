@@ -385,7 +385,7 @@
 				var controls = new THREE.OrbitControls( camera, renderer.domElement );
 
 				stats = new Stats();
-				//container.appendChild( stats.dom ); //STATS TURNED OFF
+				container.appendChild( stats.dom ); //STATS TURNED OFF
 
 				document.addEventListener( 'mousemove', onDocumentMouseMove, false );
 				document.addEventListener( 'touchstart', onDocumentTouchStart, false );

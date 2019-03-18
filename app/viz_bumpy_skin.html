@@ -503,7 +503,7 @@
 
 
         //This is where faces could go
-        var mapSpecular = textureLoader.load( "textures/skin/Skin_Map_low_Saturation_Shadow_3_7_2019_specular.jpg" );
+        var mapSpecular = textureLoader.load( "textures/skin/Skin_tiled_blue_2048.jpg" );
 
         //var mapSpecular = textureLoader.load( "models/gltf/LeePerrySmith/Map-SPEC.jpg" );
         mapSpecular.anisotropy = 4;
@@ -516,7 +516,7 @@
 
         //Emissive settings, though intensity doesn't seem to do anything.
         // first two give it a veiny look somehow
-        var mapEmissive = textureLoader.load( "textures/skin/Skin_Map_low_Saturation_Shadow_3_7_2019_specular.jpg" );
+        var mapEmissive = textureLoader.load( "textures/skin/Skin_tiled_blue_2048.jpg" );
         material.emissive = new THREE.Color( 0x85702F);//85702F this is the veiny one ); //latest with Caitlin 4286A6
         material.emissiveMap = mapEmissive;
 
@@ -550,7 +550,7 @@
 
 
         //Bump map for skin texture
-        var mapHeight = textureLoader.load( "textures/skin/Skin_Map_low_Saturation_Shadow_3_7_2019_bump.jpg" );
+        var mapHeight = textureLoader.load( "textures/skin/Skin_tiled_blue_2048.jpg" );
         mapHeight.anisotropy = 4;
         mapHeight.wrapS = mapHeight.wrapT = THREE.RepeatWrapping;
         mapHeight.format = THREE.RGBFormat;
