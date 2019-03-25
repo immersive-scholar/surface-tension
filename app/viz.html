@@ -935,7 +935,6 @@
       if (file == undefined)  var file = "data/uscitiesv1.4.csv";//"data/us_states.csv";
 
       var the_data;
-      var the_data2;
 
 
       Papa.parse(file, {
@@ -950,13 +949,13 @@
             for (var i = 0; i < filtered_states.length; i++) {
               if (value[1] == undefined) return false;
               if (value[1].slice(-4).indexOf(filtered_states[i]) > -1) {
-                //if (value[1].indexOf(filtered_states[i]) < )
                 return false;
               }
             }
             return true;
           }
           the_data = {"data": results.data.filter(checker)};
+
 
           var streamflow_column;
           var streamflow_column_name;
@@ -971,6 +970,7 @@
             streamflow_column = 13;
             streamflow_column_name = "percentile";
           }
+
 
           var column_data_max = 0.0; //if using something other than percentile (which is already 0-100), we need to figure out comparative percentage of stage so need stage max
           var column_data_min = 0.0;
