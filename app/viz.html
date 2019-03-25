@@ -1005,8 +1005,8 @@
 
               //logarithmic conversion
               var new_blobby = logsl.logar(parseFloat(the_data.data[rand_point][streamflow_column]));
-              if (get_url_params("scaling") == "barebones") {
-                //barebones conversion
+              if (get_url_params("scaling") == "highpass") {
+                //highpass conversion
                 var new_blobby = parseFloat(the_data.data[rand_point][streamflow_column])/column_data_max * 100.0;//80.0 + 20;
               }
               if (get_url_params("scaling") == "full_range") {
