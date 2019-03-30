@@ -1,6 +1,7 @@
 models
 webgl_*
 app/data/temp.csv
+design_assets/
 
 .DS_Store
 
