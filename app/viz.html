@@ -294,7 +294,7 @@
       var move_point;
       var ValuesChanger;
       //var dataMouseSize;
-      var nn;
+
       //https://stackoverflow.com/questions/831030/how-to-get-get-request-parameters-in-javascript
       function get_url_params(name){
         if(name=(new RegExp('[?&]'+encodeURIComponent(name)+'=([^&]*)')).exec(location.search)) {
@@ -935,6 +935,7 @@
       if (file == undefined)  var file = "data/uscitiesv1.4.csv";//"data/us_states.csv";
 
       var the_data;
+      var the_sorted_data;
 
 
       Papa.parse(file, {
@@ -951,10 +952,12 @@
               if (value[1].slice(-4).indexOf(filtered_states[i]) > -1) {
                 return false;
               }
+              if (value[13].indexOf("0") == 0 || value[13].indexOf(" ") == 0) return false; //uh oh, also filtering for zero percentiles
             }
             return true;
           }
           the_data = {"data": results.data.filter(checker)};
+
 
 
           var streamflow_column;
@@ -965,11 +968,22 @@
           //if streaflow column name argument is allowed, find it's index and use it
           if (["percentile", "class", "stage", "flow", "percent_median", "percent_mean"].includes(streamflow_column_name)) {
             streamflow_column = the_data.data[0].indexOf(streamflow_column_name);
+
           } else {
             //default values if nothing is provided in the url parameters
             streamflow_column = 13;
             streamflow_column_name = "percentile";
           }
+
+          function Comparator(a, b){
+            if (parseFloat(a[streamflow_column]) < parseFloat(b[streamflow_column])) return -1;
+            if (parseFloat(a[streamflow_column]) > parseFloat(b[streamflow_column])) return 1;
+            return 0;
+          }
+
+          the_sorted_data = the_data.data;//.sort(Comparator)
+          the_sorted_data.sort(Comparator);
+          the_data.data = the_sorted_data.slice(0, the_sorted_data.indexOf(0));
 
 
           var column_data_max = 0.0; //if using something other than percentile (which is already 0-100), we need to figure out comparative percentage of stage so need stage max
@@ -979,39 +993,51 @@
 
             column_data_min = parseFloat(the_data.data[i][streamflow_column]) < column_data_min ? the_data.data[i][streamflow_column] : column_data_min;
           }
-
+          //console.log("Col data min "+column_data_min)
 
 
 
 
           //Logarithmic scaling
           var logsl = new LogSlider({minval: column_data_min, maxval: column_data_max});
-
+          var the_count = 0;
+          var data_point = the_count;
           the_blobulator = function(){
 
-            var rand_point = 1 + parseInt(Math.random()*(the_data.data.length-1));
+            //data_point =1 + parseInt(Math.random()*(the_data.data.length-1)); //random data points
 
-            var coords = projection([the_data.data[rand_point][3],the_data.data[rand_point][2]]);
-            //cities data
-            if (file == "data/uscitiesv1.4.csv") {
-              var coords = projection([the_data.data[rand_point][7],the_data.data[rand_point][6]]);
-              //states data //var coords = projection([the_data.data[rand_point][2],the_data.data[rand_point][1]]);
+            if (the_count >= the_data.data.length-1) {
+              console.log("RESET")
+              the_count = 1;
+            } else {
+              the_count+=1;
             }
 
-            if (coords != null && !isNaN(parseFloat(the_data.data[rand_point][streamflow_column]))) {
+            data_point = the_count;
+
+            console.log(data_point+ " "+parseFloat(the_data.data[data_point][streamflow_column]));
+            var coords = projection([the_data.data[data_point][3],the_data.data[data_point][2]]);
+            //cities data
+            if (file == "data/uscitiesv1.4.csv") {
+              var coords = projection([the_data.data[data_point][7],the_data.data[data_point][6]]);
+              //states data //var coords = projection([the_data.data[data_point][2],the_data.data[data_point][1]]);
+            }
+
+            if (coords != null && !isNaN(parseFloat(the_data.data[data_point][streamflow_column])) &&     parseFloat(the_data.data[data_point][streamflow_column]) != 0) {
               var coordies = [];
               coordies[0] = convertRange(coords[0], [0, width], [(BOUNDS/2-BOUNDS), BOUNDS/2]);
               coordies[1] = convertRange(coords[1], [0, height], [(BOUNDS/2-BOUNDS)/(width/height), BOUNDS/2/(width/height)]);
 
-              //logarithmic conversion
-              var new_blobby = logsl.logar(parseFloat(the_data.data[rand_point][streamflow_column]));
+              //logarithmic conversion by default
+              var new_blobby = logsl.logar(parseFloat(the_data.data[data_point][streamflow_column]));
+              //console.log("VALUE "+parseFloat(the_data.data[data_point][streamflow_column])+" RAND "+data_point)
               if (get_url_params("scaling") == "highpass") {
                 //highpass conversion
-                var new_blobby = parseFloat(the_data.data[rand_point][streamflow_column])/column_data_max * 100.0;//80.0 + 20;
+                new_blobby = parseFloat(the_data.data[data_point][streamflow_column])/column_data_max * 100.0;//80.0 + 20;
               }
               if (get_url_params("scaling") == "full_range") {
                 //true range conversion
-                var new_blobby = convertRange(parseFloat(the_data.data[rand_point][streamflow_column]),[column_data_min, column_data_max], [0.0, 100.0]);
+                new_blobby = convertRange(parseFloat(the_data.data[data_point][streamflow_column]),[column_data_min, column_data_max], [0.0, 100.0]);
               }
 
 
@@ -1021,7 +1047,12 @@
                 move_point = {x:coordies[0],z:coordies[1]}
 
               }
+            } else {
+              valuesChanger(0);
+              move_point = {x:10000,z:10000}
             }
+
+
           }
 
           var bubbler = setInterval(the_blobulator, 50)
