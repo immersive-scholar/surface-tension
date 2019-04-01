@@ -5,6 +5,9 @@
  </head>
  <body>
  <?php
+  if( ! ini_get('date.timezone') ) {
+   date_default_timezone_set('America/New_York');
+  }
    echo '<h1>USGS Streamflow Data Cacher</h1>';
    echo "\n";
 
