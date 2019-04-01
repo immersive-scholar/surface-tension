@@ -13,12 +13,6 @@
   <script src="lib/logarithmic_scaler.js"></script>
 </head>
 <body>
-  <div id="info">
-    <a href="http://threejs.org" target="_blank" rel="noopener">three.js</a> - <span id="waterSize"></span> webgl gpgpu water<br/>
-    Select <span id="options"></span> water size<br/>
-    Move mouse to disturb water.<br>
-    Press mouse button to orbit around. 'W' key toggles wireframe.
-  </div>
 
   <script src="../build/three.js"></script>
   <script src="js/WebGL.js"></script>
@@ -316,7 +310,6 @@
 
       var simplex = new SimplexNoise();
 
-      document.getElementById( 'waterSize' ).innerText = WIDTH*2 + ' x ' + WIDTH;
 
       function change( n ) {
 
@@ -326,14 +319,6 @@
 
       }
 
-      var options = '';
-      for ( var i = 4; i < 10; i ++ ) {
-
-        var j = Math.pow( 2, i );
-        options += '<a href="#" onclick="return change(' + j + ')">' + j + 'x' + j + '</a> ';
-
-      }
-      document.getElementById( 'options' ).innerHTML = options;
 
       init();
       animate();
@@ -407,10 +392,6 @@
 
         window.addEventListener( 'resize', onWindowResize, false );
 
-        //GUI and Adjustments
-
-        var gui = new dat.GUI();
-
         var effectController = {
           mouseSize: 20.0,
           viscosity: 0.99, //.999 is max
@@ -435,19 +416,6 @@
           }
 
         };
-
-        gui.add( effectController, "mouseSize", 1.0, 100.0, 1.0 ).onChange( valuesChanger );
-        gui.add( effectController, "viscosity", 0.9, 0.999, 0.001 ).onChange( valuesChanger );
-        gui.add( effectController, "spheresEnabled", 0, 1, 1 ).onChange( valuesChanger );
-        var buttonSmooth = {
-          smoothWater: function () {
-
-            smoothWater();
-
-          }
-        };
-        gui.add( buttonSmooth, 'smoothWater' );
-
 
         initWater();
 
