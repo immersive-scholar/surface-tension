@@ -402,7 +402,7 @@
         var controls = new THREE.OrbitControls( camera, renderer.domElement );
 
         stats = new Stats();
-        container.appendChild( stats.dom ); //STATS TURNED OFF
+        if (get_url_params("stats")=="on") container.appendChild( stats.dom ); //STATS TURNED OFF, will control with query string API
 
         document.addEventListener( 'mousemove', onDocumentMouseMove, false );
         document.addEventListener( 'touchstart', onDocumentTouchStart, false );
@@ -1008,13 +1008,13 @@
                 the_count+=1;
               }
               data_point = the_count;
-              
+
             } else {
               data_point = 1 + parseInt(Math.random()*(the_data.data.length-1)); //random data points excluding element 0 which are columns in the csv
             }
             //data_point =1 + parseInt(Math.random()*the_count); //random within a window bounded by the_count
 
-            console.log(data_point+ " "+parseFloat(the_data.data[data_point][streamflow_column]));
+            //console.log(data_point+ " "+parseFloat(the_data.data[data_point][streamflow_column]));
             var coords = projection([the_data.data[data_point][3],the_data.data[data_point][2]]);
             //cities data
             if (file == "data/uscitiesv1.4.csv") {
@@ -1026,9 +1026,6 @@
               var coordies = [];
               coordies[0] = convertRange(coords[0], [0, width], [(BOUNDS/2-BOUNDS), BOUNDS/2]);
               coordies[1] = convertRange(coords[1], [0, height], [(BOUNDS/2-BOUNDS)/(width/height), BOUNDS/2/(width/height)]);
-
-              //logarithmic conversion by default
-              //var new_blobby = logsl.logar(parseFloat(the_data.data[data_point][streamflow_column]));
 
               var new_blobby = logsl.logar(convertRange(parseFloat(the_data.data[data_point][streamflow_column]),[column_data_min, column_data_max], [0.0, 85.0]));
 
