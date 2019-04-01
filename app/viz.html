@@ -874,7 +874,6 @@
 
           if ( intersects.length > 0 ) {
             var point = intersects[ 0 ].point;
-            //console.log(point.x+" "+point.z)
             uniforms[ "mousePos" ].value.set( point.x, point.z );
 
           } else {
@@ -891,7 +890,6 @@
           //move_point = {x:parseInt(Math.random()*512-256),z:parseInt(Math.random()*512-256)}
           var point = move_point;//intersects[ 0 ].point;
           if (point != undefined) {
-            //console.log(point.x+" "+point.z)
             uniforms[ "mousePos" ].value.set( point.x, point.z );
           }
 
@@ -960,29 +958,32 @@
 
 
           //Filter out noncontiguous US places Hawaii, Pureto Rico, and Alaska because we are showing a less abstract continental map vs just USA, and these places don't really appear in this map
-          function checker(value) {
+          function non_contiguous_land_filter(value) {
             var filtered_states =  [", AK", " AK", ", PR", " PR", ", HI", " HI"]; //only commas 202 are removed. if non comma filters are included, 549 are removed. Out of the 347 extra, how many are false positives? adding the slice(-4) to check only the ending part of site desciption for state abbreviation I get 327 filtered out, so 222 false positives restored by using slice
             for (var i = 0; i < filtered_states.length; i++) {
               if (value[1] == undefined) return false;
-              if (value[1].slice(-4).indexOf(filtered_states[i]) > -1) {
-                return false;
-              }
-              if (value[streamflow_column].indexOf("0") == 0 || value[streamflow_column].indexOf(" ") == 0) return false; //uh oh, also filtering for zero percentiles
+              if (value[1].slice(-4).indexOf(filtered_states[i]) > -1) return false;
             }
             return true;
           }
-          the_data = {"data": results.data.filter(checker)};
+          the_data = {"data": results.data.filter(non_contiguous_land_filter)};
 
-          function Comparator(a, b){
+
+          function percentile_filter(value) {
+            if (value[streamflow_column].indexOf("0") == 0 || value[streamflow_column].indexOf(" ") == 0) return false;
+            return true;
+          }
+
+          if (streamflow_column_name == "percentile") the_data = {"data": the_data.data.filter(percentile_filter)}
+
+          function Sorter(a, b){
             if (parseFloat(a[streamflow_column]) < parseFloat(b[streamflow_column])) return -1;
             if (parseFloat(a[streamflow_column]) > parseFloat(b[streamflow_column])) return 1;
             return 0;
           }
 
           the_sorted_data = the_data.data;//.sort(Comparator)
-          the_sorted_data.sort(Comparator);
-          the_data.data = the_sorted_data.slice(0, the_sorted_data.indexOf(0));
-
+          the_sorted_data.sort(Sorter);
 
           var column_data_max = 0.0; //if using something other than percentile (which is already 0-100), we need to figure out comparative percentage of stage so need stage max
           var column_data_min = 0.0;
@@ -991,9 +992,6 @@
 
             column_data_min = parseFloat(the_data.data[i][streamflow_column]) < column_data_min ? the_data.data[i][streamflow_column] : column_data_min;
           }
-          //console.log("Col data min "+column_data_min)
-
-
 
 
           //Logarithmic scaling
@@ -1002,21 +1000,21 @@
           var data_point = the_count;
           the_blobulator = function(){
 
-            //data_point =1 + parseInt(Math.random()*(the_data.data.length-1)); //random data points
-
-            if (the_count >= the_data.data.length-1) {
-              console.log("RESET")
-              the_count = 1;
+            if (get_url_params("sorting") == "percentile") {
+              if (the_count >= the_data.data.length-1) {
+                console.log("RESET")
+                the_count = 1;
+              } else {
+                the_count+=1;
+              }
+              data_point = the_count;
+              
             } else {
-              the_count+=1;
+              data_point = 1 + parseInt(Math.random()*(the_data.data.length-1)); //random data points excluding element 0 which are columns in the csv
             }
+            //data_point =1 + parseInt(Math.random()*the_count); //random within a window bounded by the_count
 
-            data_point = the_count;
-
-            //data_point =1 + parseInt(Math.random()*(the_data.data.length-1)); //random data points
-
-
-            //console.log(data_point+ " "+parseFloat(the_data.data[data_point][streamflow_column]));
+            console.log(data_point+ " "+parseFloat(the_data.data[data_point][streamflow_column]));
             var coords = projection([the_data.data[data_point][3],the_data.data[data_point][2]]);
             //cities data
             if (file == "data/uscitiesv1.4.csv") {
