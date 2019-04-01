@@ -17,10 +17,6 @@ span.bad {
   color:                  OrangeRed;
 }
 
-#MainNav a {
-    color:                  #EB1C34;
-}
-
 p {
   font-weight:            100;
   margin:                 1em 0 2em 0;
@@ -48,117 +44,6 @@ h3 {
   font-size:              .8em;
   font-weight:            600;
   font-variant:           small-caps;
-}
-
-div#Footer {
-  padding:                  0 0 2em;
-  text-align:               center;
-  font-size:                .65em;
-  background-color:         #444;
-  margin:                   4em auto 0;
-  overflow:                 hidden;
-  font-family:              "Trebuchet MS", sans-serif;
-  height:                   1em;
-  font-weight:              600;
-}
-
-div#Footer a{
-  color:                    #ddd;
-
-}
-
-div#Footer li {
-  display: inline;
-  padding: 1em;
-}
-
-.WideRight img{
-    width: 100%;
-}
-
-.WideRight .column {
-    width: 47%;
-    float: left;
-}
-
-.WideRight .column#left-side {
-    padding-right: 2.5em;
-}
-
-.WideRight p.DoubleImageAndDescription{
-   font-size: .9em;
-}
-
-.WideRight p.ImageAndDescription img{
-    margin: 0 0 .5em 0
-}
-
-.WideRight p.DoubleImageAndDescription img{
-   width: 47.6%;
-}
-
-.WideRight p.DoubleImageAndDescription img.left{
-   margin: 0 1.1em 0 0;
-}
-
-p.credits {
-	  font-size: .6em;
-}
-
-#thumbs {
-    text-align: justify;
-    -ms-text-justify: distribute-all-lines;
-    text-justify: distribute-all-lines;
-}
-#thumbs a {
-    width: 30%;
-    vertical-align: top;
-    display: inline-block;
-    *display: inline;
-    zoom: 1;
-}
-
-.half#thumbs a {
-    width: 47%;
-}
-
-.half#thumbs img {
-    opacity: 0.7;
-}
-
-.stretch {
-    width: 100%;
-    display: inline-block;
-    font-size: 0;
-    line-height: 0;
-}
-
-
-.two-column-thumbs {
-  width: 100%;
-}
-
-.big-thumb {
-  width: 60%;
-  float: left;
-  margin-right: 3em;
-}
-
-.big-thumb img {
-}
-
-.right-thumbs {
-  width: 20%;
-  float: left;
-}
-
-.right-thumbs img {
-  margin-bottom: 1em;
-  opacity: 0.75;
-  filter: alpha(opacity=75); /* For IE8 and earlier */
-    -moz-box-shadow:    1px 1px 1px 1px #aaa;
-  -webkit-box-shadow: 1px 1px 1px 1px #aaa;
-  box-shadow:         1px 1px 1px 1px #aaa;
 }
 
 .shadow {

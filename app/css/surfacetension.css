@@ -1,0 +1,43 @@
+html, body, div#meta {
+  height: 100%;
+}
+body {
+  background-color: #000000;
+  margin: 0px;
+  overflow: hidden;
+  font-family:Monospace;
+  font-size:13px;
+  text-align:center;
+  text-align:center;
+}
+
+a {
+  color:#0078ff;
+}
+
+#info {
+  color: #ffffff;
+  position: absolute;
+  top: 10px;
+  width: 100%;
+  display: none;
+}
+
+.dg {
+  display: none;
+}
+
+#SurfaceTension {
+  float: left;
+}
+
+#meta {
+  overflow: auto;
+  background-color: #fff;
+  padding: 2em;
+  height: 100%;
+}
+
+#meta p {
+  text-align: left;
+}

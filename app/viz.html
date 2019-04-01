@@ -4,34 +4,7 @@
   <title>NCSU Immersive Scholars Caitlin & Misha</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
-  <style>
-  body {
-    background-color: #000000;
-    margin: 0px;
-    overflow: hidden;
-    font-family:Monospace;
-    font-size:13px;
-    text-align:center;
-    text-align:center;
-  }
-
-  a {
-    color:#0078ff;
-  }
-
-  #info {
-    color: #ffffff;
-    position: absolute;
-    top: 10px;
-    width: 100%;
-    display: none;
-  }
-
-  .dg {
-    display: none;
-  }
-
-  </style>
+  <link rel="stylesheet" type="text/css" href="css/surfacetension.css">
 
   <script src="lib/d3.v3.min.js">//http://d3js.org/</script>
   <script src="lib/topojson.v1.min.js"></script>
@@ -40,8 +13,6 @@
   <script src="lib/logarithmic_scaler.js"></script>
 </head>
 <body>
-
-
   <div id="info">
     <a href="http://threejs.org" target="_blank" rel="noopener">three.js</a> - <span id="waterSize"></span> webgl gpgpu water<br/>
     Select <span id="options"></span> water size<br/>
@@ -291,9 +262,11 @@
       </script>
 
       <script>
+
       var move_point;
       var ValuesChanger;
-      //var dataMouseSize;
+      var viz_scaler = 1;
+
 
       //https://stackoverflow.com/questions/831030/how-to-get-get-request-parameters-in-javascript
       function get_url_params(name){
@@ -353,7 +326,6 @@
 
       }
 
-
       var options = '';
       for ( var i = 4; i < 10; i ++ ) {
 
@@ -369,20 +341,33 @@
       function init() {
 
         container = document.createElement( 'div' );
+        container.setAttribute("id", "SurfaceTension");
         document.body.appendChild( container );
+
+
+        if (get_url_params("sidebar")!=undefined) {
+          //to filt sideboar with text to show meta info plus as a workaround to really wide but short displays
+          var sidebarsize = parseFloat(get_url_params("sidebar"));
+          console.log("side bar "+sidebarsize)
+          if (sidebarsize <= 0 || sidebarsize >= 100) {
+            console.log("Sidebar width must be above 0 and below 100 (percent)");
+            //sidebar is too small or too big
+          } else {
+            var main_size = 100 - sidebarsize;
+            viz_scaler = window.innerWidth * main_size / 100.0 /window.innerWidth;
+          }
+
+        }
 
         var zoom_margin = 20;
         // Calculate the camera distance https://stackoverflow.com/questions/14614252/how-to-fit-camera-to-object
         var dist = 200;
         var hheight = BOUNDS;
         var wwidth = BOUNDS - zoom_margin;
-        //var fov = 2 * Math.atan( hheight / ( 2 * dist ) ) * ( 180 / Math.PI ); //to height
-        var fov = 2 * Math.atan( ( wwidth / (window.innerWidth / window.innerHeight) ) / ( 2 * dist ) ) * ( 180 / Math.PI ); // in degrees
+        var fov = 2 * Math.atan( ( wwidth / (window.innerWidth  / window.innerHeight) ) / ( 2 * dist ) ) * ( 180 / Math.PI ); // in degrees
 
-        camera = new THREE.PerspectiveCamera( fov, window.innerWidth / window.innerHeight, 1, 3000 );
+        camera = new THREE.PerspectiveCamera( fov, window.innerWidth * viz_scaler / window.innerHeight, 1, 3000 );
         camera.position.set( 0, dist, 0 );
-
-        //camera.updateProjectionMatrix();
 
         scene = new THREE.Scene();
 
@@ -470,6 +455,12 @@
 
         valuesChanger();
 
+
+        if (viz_scaler < 1) {
+          document.getElementById("SurfaceTension").style.width = String(viz_scaler * 100.0)+"%";
+          document.getElementById("SurfaceTension").childNodes.item("canvas").style.width = "100%";
+
+        }
       }
 
 
@@ -805,12 +796,12 @@
       }
 
       function onWindowResize() {
-
-        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.aspect = window.innerWidth * viz_scaler / window.innerHeight;
         camera.updateProjectionMatrix();
 
         renderer.setSize( window.innerWidth, window.innerHeight );
 
+        document.getElementById("SurfaceTension").childNodes.item("canvas").style.width = "100%";
 
       }
 
@@ -915,19 +906,19 @@
 
       </script>
 
-      //D3 Map Projection
+
       <script>
+      //D3 Map Projection
 
       var width = 960;
       height = 600;
       scaler = 800;
       default_scaler = 1000; //not sure why the heck d3 has default scaling value at 1000?
 
-
       var projection = d3.geo.albersUsa()
       .scale([scaler])
       .translate([width/2, height/2]);
-
+      //end of D3 stuff
 
       var file = get_url_params("data");
       if (file == undefined)  var file = "data/uscitiesv1.4.csv";//"data/us_states.csv";
@@ -1061,9 +1052,20 @@
         return ( value - r1[ 0 ] ) * ( r2[ 1 ] - r2[ 0 ] ) / ( r1[ 1 ] - r1[ 0 ] ) + r2[ 0 ];
       }
 
-
-
-
       </script>
+
+      <div id="meta">
+
+        <h1>Surface Tension</h1>
+        <h2>Reflections on realtime streamflow</h2>
+        <h3>by Caitlin & Misha</h3>
+        <p>
+          Artistic visualization of humanity's fraught relationship with freshwater by Caitlin & Misha for the Immersive Scholar residency at NCSU.
+        </p>
+        <p>
+          Made with the help of Walt Gurley (NCSU) and Kris McSwain (USGS). Special thanks also to Shelby Hallman, Erica Hayes, Micah Vandegrift, NCSU Libraries, and the USGS Raleigh office. Thanks also to Caitlin's mom.
+        </p>
+
+      </div>
     </body>
     </html>
