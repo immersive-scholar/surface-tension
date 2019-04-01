@@ -5,6 +5,11 @@
 </head>
 <body>
   <?php
+  //url query string parameter GET-style API options to possibly pass to the visualization
+  $sidebar = filter_input(INPUT_GET, 'sidebar', FILTER_SANITIZE_URL);
+
+  $sorting = filter_input(INPUT_GET, 'sorting', FILTER_SANITIZE_URL);
+
 
   echo '<h1>USGS Streamflow Data Cacher</h1>';
   echo "\n";
@@ -34,7 +39,7 @@
     echo "<h3><span class='good'>Cached data for today was found.</span></h3>";echo "\n";
     //load visualization and pass it this file's name as a parameter;
     //*******************************************************************************************************************************************************************************
-    load_viz($filepath);
+    load_viz($filepath, $sorting, $sidebar);
   } else {
     echo "<h3>No cached data for today.</h3>";echo "\n";
     //load the file from usgs.
@@ -90,7 +95,7 @@
       } else {
         //*******************************************************************************************************************************************************************************
         //copying worked! Load viz with new cache file
-        load_viz($filepath);
+        load_viz($filepath, $sorting, $sidebar);
       }
     } else {
       //Can't load data, use previous cached file
@@ -101,7 +106,7 @@
       echo "</ul>";
       //*******************************************************************************************************************************************************************************
       //Load viz with previously cached file
-      load_viz($data_dir.'/'.$last_cached_file);
+      load_viz($data_dir.'/'.$last_cached_file, $sorting, $sidebar);
     }
   }
   //scan_dir function based on https://stackoverflow.com/questions/11923235/scandir-to-sort-by-date-modified
@@ -122,11 +127,11 @@
 
     return ($files[0]) ? $files[0] : false;
   }
-  function load_viz($pathy){
+  function load_viz($pathy, $sorting, $sidebar){
     echo "<a href='".$pathy."'>".$pathy."</a>";
     echo "\n\n</body>";
     echo "\n<script>setTimeout(function(){
-      window.location.href = 'app/viz.html?data=".$pathy."';
+      window.location.href = 'app/viz.html?data=".$pathy."&sorting=".$sorting."&sidebar=".$sidebar."';
     }, 3000)</script>";
   }
   ?>
