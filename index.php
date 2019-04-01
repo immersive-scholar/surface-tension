@@ -5,12 +5,16 @@
  </head>
  <body>
  <?php
-  if( ! ini_get('date.timezone') ) {
-   date_default_timezone_set('America/New_York');
-  }
+
    echo '<h1>USGS Streamflow Data Cacher</h1>';
    echo "\n";
-
+   if( ! ini_get('date.timezone') ) {
+    date_default_timezone_set('America/New_York');
+    echo '<h2><span class="bad">Server timezone not set </span>, using: '.date_default_timezone_get().'</h2>';
+  } else {
+    echo '<h2>Server timezone set to '.ini_get('date.timezone').'</h2>';
+  }
+  echo "\n";
    $data_dir = '/app/data';
    $filepath = $data_dir.'/realtime-streamflow-'.date("Y-m-d").'.csv';
 
