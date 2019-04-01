@@ -943,23 +943,6 @@
         complete: function(results){
           console.log("Finished:", results.data.length)
 
-
-          //Filter out noncontiguous US places Hawaii, Pureto Rico, and Alaska because we are showing a less abstract continental map vs just USA, and these places don't really appear in this map
-          function checker(value) {
-            var filtered_states =  [", AK", " AK", ", PR", " PR", ", HI", " HI"]; //only commas 202 are removed. if non comma filters are included, 549 are removed. Out of the 347 extra, how many are false positives? adding the slice(-4) to check only the ending part of site desciption for state abbreviation I get 327 filtered out, so 222 false positives restored by using slice
-            for (var i = 0; i < filtered_states.length; i++) {
-              if (value[1] == undefined) return false;
-              if (value[1].slice(-4).indexOf(filtered_states[i]) > -1) {
-                return false;
-              }
-              if (value[13].indexOf("0") == 0 || value[13].indexOf(" ") == 0) return false; //uh oh, also filtering for zero percentiles
-            }
-            return true;
-          }
-          the_data = {"data": results.data.filter(checker)};
-
-
-
           var streamflow_column;
           var streamflow_column_name;
 
@@ -974,6 +957,21 @@
             streamflow_column = 13;
             streamflow_column_name = "percentile";
           }
+
+
+          //Filter out noncontiguous US places Hawaii, Pureto Rico, and Alaska because we are showing a less abstract continental map vs just USA, and these places don't really appear in this map
+          function checker(value) {
+            var filtered_states =  [", AK", " AK", ", PR", " PR", ", HI", " HI"]; //only commas 202 are removed. if non comma filters are included, 549 are removed. Out of the 347 extra, how many are false positives? adding the slice(-4) to check only the ending part of site desciption for state abbreviation I get 327 filtered out, so 222 false positives restored by using slice
+            for (var i = 0; i < filtered_states.length; i++) {
+              if (value[1] == undefined) return false;
+              if (value[1].slice(-4).indexOf(filtered_states[i]) > -1) {
+                return false;
+              }
+              if (value[streamflow_column].indexOf("0") == 0 || value[streamflow_column].indexOf(" ") == 0) return false; //uh oh, also filtering for zero percentiles
+            }
+            return true;
+          }
+          the_data = {"data": results.data.filter(checker)};
 
           function Comparator(a, b){
             if (parseFloat(a[streamflow_column]) < parseFloat(b[streamflow_column])) return -1;
@@ -1015,7 +1013,10 @@
 
             data_point = the_count;
 
-            console.log(data_point+ " "+parseFloat(the_data.data[data_point][streamflow_column]));
+            //data_point =1 + parseInt(Math.random()*(the_data.data.length-1)); //random data points
+
+
+            //console.log(data_point+ " "+parseFloat(the_data.data[data_point][streamflow_column]));
             var coords = projection([the_data.data[data_point][3],the_data.data[data_point][2]]);
             //cities data
             if (file == "data/uscitiesv1.4.csv") {
@@ -1029,8 +1030,10 @@
               coordies[1] = convertRange(coords[1], [0, height], [(BOUNDS/2-BOUNDS)/(width/height), BOUNDS/2/(width/height)]);
 
               //logarithmic conversion by default
-              var new_blobby = logsl.logar(parseFloat(the_data.data[data_point][streamflow_column]));
-              //console.log("VALUE "+parseFloat(the_data.data[data_point][streamflow_column])+" RAND "+data_point)
+              //var new_blobby = logsl.logar(parseFloat(the_data.data[data_point][streamflow_column]));
+
+              var new_blobby = logsl.logar(convertRange(parseFloat(the_data.data[data_point][streamflow_column]),[column_data_min, column_data_max], [0.0, 85.0]));
+
               if (get_url_params("scaling") == "highpass") {
                 //highpass conversion
                 new_blobby = parseFloat(the_data.data[data_point][streamflow_column])/column_data_max * 100.0;//80.0 + 20;
@@ -1055,7 +1058,7 @@
 
           }
 
-          var bubbler = setInterval(the_blobulator, 50)
+          var bubbler = setInterval(the_blobulator, 10)
         }
       });
 
