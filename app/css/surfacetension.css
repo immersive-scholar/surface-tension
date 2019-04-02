@@ -5,9 +5,12 @@ body {
   margin: 0px;
   overflow: hidden;
   font-family:Monospace;
-  font-size:13px;
+  font-size:1em;
   text-align:center;
   text-align:center;
+
+  font-family: 'Asap', sans-serif;
+  font-family: 'Arvo', serif;
 }
 
 .dg {
