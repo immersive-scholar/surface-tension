@@ -445,20 +445,20 @@
 
 
         //This is where faces could go
-        var mapSpecular = textureLoader.load( "textures/skin/Skin_Map_Rivers3.jpg" );
+        var mapSpecular = textureLoader.load( "textures/skin/Skin_Map_Rivers6.jpg" );
 
         //var mapSpecular = textureLoader.load( "models/gltf/LeePerrySmith/Map-SPEC.jpg" );
         mapSpecular.anisotropy = 4;
         mapSpecular.wrapS = mapSpecular.wrapT = THREE.RepeatWrapping;
         mapSpecular.format = THREE.RGBFormat;
-        material.specular = new THREE.Color( 0x660B14);
+        material.specular = new THREE.Color( 0x022591); //660B14 //7420AD //56188A //3D429E //3D429E
         material.shininess = 7;
         material.specularMap = mapSpecular;
 
 
         //Emissive settings, though intensity doesn't seem to do anything.
-        var mapEmissive = textureLoader.load( "textures/skin/Skin_Map_Rivers3.jpg" );
-        material.emissive = new THREE.Color( 0x85702F);//0x85702F);//85702F this is the veiny one ); //latest with Caitlin 4286A6// 0B2624
+        var mapEmissive = textureLoader.load( "textures/skin/Skin_Map_Rivers6.jpg" );
+        material.emissive = new THREE.Color( 0x662B1A);//0x85702F);//85702F this is the veiny one ); //latest with Caitlin 4286A6// 0B2624 //331C52 //660B14 //662B1A
         material.emissiveMap = mapEmissive;
 
 
@@ -509,8 +509,8 @@
         material.uniforms["specularMap"].value = material.specularMap;
 
 
-        //material.uniforms["emissive"].value = material.emissive;
-        //material.uniforms["emissiveMap"].value = material.emissiveMap;
+        material.uniforms["emissive"].value = material.emissive;
+        material.uniforms["emissiveMap"].value = material.emissiveMap;
 
 
         material.uniforms[ "map" ].value = material.map;
