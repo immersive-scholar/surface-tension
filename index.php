@@ -21,7 +21,13 @@
   }
   echo "\n";
   $data_dir = '/app/data';
-  $filepath = $data_dir.'/realtime-streamflow-'.date("Y-m-d-H-i").'.csv'; //"Y-m-d-H-i-s" for real real time
+  $relative_data_dir = 'data'; //the fact that I need this makes me sad. If I use the data_dir path it all works locally. But on my dreamhost, when this php script goes to finally load viz.html, viz.html can't find the file. If viz.html is handed a more relative path (no 'app' in relative_data_dir because viz.html is in app together with the data folder), it can indeed find it. I tried changing data_dir to just be relative and use that in javascript and below where we check for locally cached files. That broke checking for cached files. So now I guess we need two hardcoded directory path variables, one more relative for JavaScript viz.html and one less relative for index.php. Maybe index.php and app should be in the same folder.
+
+  $data_file_path = '/realtime-streamflow-'.date("Y-m-d-H-i").'.csv';//"Y-m-d-H-i-s" for real real time
+
+  $filepath = $data_dir.$data_file_path;
+  $more_relative_filepath = $relative_data_dir.$data_file_path;
+
 
   $tempdata = $data_dir.'/temp.csv';
   echo '<h2>Scanning for:</h2>';echo "\n";
@@ -39,7 +45,7 @@
     echo "<h3><span class='good'>Cached data for today was found.</span></h3>";echo "\n";
     //load visualization and pass it this file's name as a parameter;
     //*******************************************************************************************************************************************************************************
-    load_viz($filepath, $sorting, $sidebar);
+    load_viz($more_relative_filepath, $sorting, $sidebar);
   } else {
     echo "<h3>No cached data for today.</h3>";echo "\n";
     //load the file from usgs.
@@ -95,7 +101,7 @@
       } else {
         //*******************************************************************************************************************************************************************************
         //copying worked! Load viz with new cache file
-        load_viz($filepath, $sorting, $sidebar);
+        load_viz($more_relative_filepath, $sorting, $sidebar);
       }
     } else {
       //Can't load data, use previous cached file
@@ -106,7 +112,7 @@
       echo "</ul>";
       //*******************************************************************************************************************************************************************************
       //Load viz with previously cached file
-      load_viz($data_dir.'/'.$last_cached_file, $sorting, $sidebar);
+      load_viz($more_relative_filepath.'/'.$last_cached_file, $sorting, $sidebar);
     }
   }
   //scan_dir function based on https://stackoverflow.com/questions/11923235/scandir-to-sort-by-date-modified
