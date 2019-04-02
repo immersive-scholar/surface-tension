@@ -330,7 +330,7 @@
         document.body.appendChild( container );
 
 
-        if (get_url_params("sidebar")!=undefined) {
+        if (get_url_params("sidebar")!=undefined && get_url_params("sidebar")!="") {
           //to filt sideboar with text to show meta info plus as a workaround to really wide but short displays
           var sidebarsize = parseFloat(get_url_params("sidebar"));
           console.log("side bar "+sidebarsize)
