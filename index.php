@@ -21,7 +21,7 @@
   }
   echo "\n";
   $data_dir = '/app/data';
-  $filepath = $data_dir.'/realtime-streamflow-'.date("Y-m-d").'.csv'; //"Y-m-d-H-i-s" for real real time
+  $filepath = $data_dir.'/realtime-streamflow-'.date("Y-m-d-H-i").'.csv'; //"Y-m-d-H-i-s" for real real time
 
   $tempdata = $data_dir.'/temp.csv';
   echo '<h2>Scanning for:</h2>';echo "\n";
