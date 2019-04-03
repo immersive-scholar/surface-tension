@@ -457,14 +457,14 @@
         mapSpecular.anisotropy = 4;
         mapSpecular.wrapS = mapSpecular.wrapT = THREE.RepeatWrapping;
         mapSpecular.format = THREE.RGBFormat;
-        material.specular = new THREE.Color( 0x022591); //660B14 //7420AD //56188A //3D429E //3D429E
+        material.specular = new THREE.Color( 0x572516); //660B14 //7420AD //56188A //3D429E //3D429E //021F78 //022591
         material.shininess = 7;
         material.specularMap = mapSpecular;
 
 
         //Emissive settings, though intensity doesn't seem to do anything.
-        var mapEmissive = textureLoader.load( "textures/skin/Skin_Map_Rivers6.jpg" );
-        material.emissive = new THREE.Color( 0x662B1A);//0x85702F);//85702F this is the veiny one ); //latest with Caitlin 4286A6// 0B2624 //331C52 //660B14 //662B1A
+        var mapEmissive = textureLoader.load( "textures/skin/Skin_Map_Rivers8.jpg" );
+        material.emissive = new THREE.Color( 0x002C4F);//0x85702F);//85702F this is the veiny one ); //latest with Caitlin 4286A6// 0B2624 //331C52 //660B14 //662B1A //782329
         material.emissiveMap = mapEmissive;
 
 
@@ -497,7 +497,7 @@
 
 
         //Bump map for skin texture
-        var mapHeight = textureLoader.load( "textures/skin/Skin_Map_bump_rivers2.jpg" );
+        var mapHeight = textureLoader.load( "textures/skin/Skin_Map_greyscale_greenshadow3_21_2019.jpg" );
         mapHeight.anisotropy = 4;
         mapHeight.wrapS = mapHeight.wrapT = THREE.RepeatWrapping;
         mapHeight.format = THREE.RGBFormat;
