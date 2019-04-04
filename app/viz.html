@@ -349,9 +349,11 @@
         var zoom_margin = 20;
         // Calculate the camera distance https://stackoverflow.com/questions/14614252/how-to-fit-camera-to-object
         var dist = 200;
-        var hheight = BOUNDS;
+        var hheight = (BOUNDS - zoom_margin)*.45; //for full texture bounding box in a crazy wide aspect ratio hheight would work but a bit zoomed out. The magic number .45 confuses me because I don't understand why it works (and why it's not, for example, usa aspect ratio of 960/600 or something)
         var wwidth = BOUNDS - zoom_margin;
-        var fov = 2 * Math.atan( ( wwidth / (window.innerWidth  / window.innerHeight) ) / ( 2 * dist ) ) * ( 180 / Math.PI ); // in degrees
+        //var fov = 2 * Math.atan( ( wwidth / (window.innerWidth  / window.innerHeight) ) / ( 2 * dist ) ) * ( 180 / Math.PI ); // in degrees, matching bounding box by width
+
+        fov = 2 * Math.atan( hheight / ( 2 * dist ) ) * ( 180 / Math.PI );
 
         camera = new THREE.PerspectiveCamera( fov, window.innerWidth * viz_scaler / window.innerHeight, 1, 3000 );
         camera.position.set( 0, dist, 0 );
@@ -680,7 +682,7 @@
 
       function onDocumentMouseMove( event ) {
 
-        setMouseCoords( event.clientX, event.clientY );
+        //setMouseCoords( event.clientX, event.clientY );
 
       }
 
@@ -690,7 +692,7 @@
 
           event.preventDefault();
 
-          setMouseCoords( event.touches[ 0 ].pageX, event.touches[ 0 ].pageY );
+          //setMouseCoords( event.touches[ 0 ].pageX, event.touches[ 0 ].pageY );
 
 
         }
@@ -703,7 +705,7 @@
 
           event.preventDefault();
 
-          setMouseCoords( event.touches[ 0 ].pageX, event.touches[ 0 ].pageY );
+          //setMouseCoords( event.touches[ 0 ].pageX, event.touches[ 0 ].pageY );
 
 
         }
@@ -923,7 +925,7 @@
           Artistic visualization of humanity's fraught relationship with freshwater by Caitlin & Misha for the Immersive Scholar residency at NCSU.
         </p>
         <p>
-          Special thanks to Walt Gurley (NCSU) and Kris McSwain (USGS). Thanks also to Shelby Hallman, Erica Hayes, Mara Mathews, Shirley Rodgers, Hannah Rainey, Micah Vandegrift, NCSU Libraries, and the USGS Raleigh. 
+          Special thanks to Walt Gurley (NCSU) and Kris McSwain (USGS). Thanks also to Shelby Hallman, Erica Hayes, Mara Mathews, Shirley Rodgers, Hannah Rainey, Micah Vandegrift, NCSU Libraries, and the USGS Raleigh.
         </p>
 
       </div>
