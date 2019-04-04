@@ -350,7 +350,7 @@
         // Calculate the camera distance https://stackoverflow.com/questions/14614252/how-to-fit-camera-to-object
         var dist = 200;
 
-        var the_zoom = .42;
+        var the_zoom = .42; //This setting is only good as default for Immersion Theater wall
         var requested_zoom = get_url_params("zoom");
         if (requested_zoom!=undefined && requested_zoom!="" && requested_zoom >= 0 && requested_zoom <= 1) the_zoom = parseFloat(requested_zoom);
 
