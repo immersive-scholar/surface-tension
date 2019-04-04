@@ -12,6 +12,8 @@
 
   $zoom = filter_input(INPUT_GET, 'zoom', FILTER_SANITIZE_URL);
 
+  $map = filter_input(INPUT_GET, 'map', FILTER_SANITIZE_URL);
+
   echo '<h1>USGS Streamflow Data Cacher</h1>';
   echo "\n";
   if( ! ini_get('date.timezone') ) {
@@ -46,7 +48,7 @@
     echo "<h3><span class='good'>Cached data for today was found.</span></h3>";echo "\n";
     //load visualization and pass it this file's name as a parameter;
     //*******************************************************************************************************************************************************************************
-    load_viz($more_relative_filepath, $sorting, $sidebar, $zoom);
+    load_viz($more_relative_filepath, $sorting, $sidebar, $zoom, $map);
   } else {
     echo "<h3>No cached data for today.</h3>";echo "\n";
     //load the file from usgs.
@@ -102,7 +104,7 @@
       } else {
         //*******************************************************************************************************************************************************************************
         //copying worked! Load viz with new cache file
-        load_viz($more_relative_filepath, $sorting, $sidebar, $zoom);
+        load_viz($more_relative_filepath, $sorting, $sidebar, $zoom, $map);
       }
     } else {
       //Can't load data, use previous cached file
@@ -113,7 +115,7 @@
       echo "</ul>";
       //*******************************************************************************************************************************************************************************
       //Load viz with previously cached file
-      load_viz($more_relative_filepath.'/'.$last_cached_file, $sorting, $sidebar, $zoom);
+      load_viz($more_relative_filepath.'/'.$last_cached_file, $sorting, $sidebar, $zoom, $map);
     }
   }
   //scan_dir function based on https://stackoverflow.com/questions/11923235/scandir-to-sort-by-date-modified
@@ -134,11 +136,11 @@
 
     return ($files[0]) ? $files[0] : false;
   }
-  function load_viz($pathy, $sorting, $sidebar, $zoom){
+  function load_viz($pathy, $sorting, $sidebar, $zoom, $map){
     echo "<a href='".$pathy."'>".$pathy."</a>";
     echo "\n\n</body>";
     echo "\n<script>setTimeout(function(){
-      window.location.href = 'app/viz.html?data=".$pathy."&sorting=".$sorting."&sidebar=".$sidebar."&zoom=".$zoom."';
+      window.location.href = 'app/viz.html?data=".$pathy."&sorting=".$sorting."&sidebar=".$sidebar."&zoom=".$zoom."&map=".$map."';
     }, 3000)</script>";
   }
   ?>

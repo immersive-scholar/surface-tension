@@ -350,7 +350,7 @@
         // Calculate the camera distance https://stackoverflow.com/questions/14614252/how-to-fit-camera-to-object
         var dist = 200;
 
-        var the_zoom = .42; //This setting is only good as default for Immersion Theater wall
+        var the_zoom = 1.0; //This setting is only good as default for Immersion Theater wall
         var requested_zoom = get_url_params("zoom");
         if (requested_zoom!=undefined && requested_zoom!="" && requested_zoom >= 0 && requested_zoom <= 1) the_zoom = parseFloat(requested_zoom);
 
@@ -430,8 +430,6 @@
 
       function initWater() {
 
-
-
         var geometry = new THREE.PlaneBufferGeometry( BOUNDS, BOUNDS, WIDTH - 1, WIDTH - 1 );
 
         // material: make a ShaderMaterial clone of MeshPhongMaterial, with customized vertex shader
@@ -457,10 +455,36 @@
         material.color = new THREE.Color( 0xEBC4FF);// FFB0C0 );
 
 
-        //This is where faces could go
-        var mapSpecular = textureLoader.load( "textures/skin/Skin_Map_Rivers6.jpg" );
+        if (get_url_params("map") != undefined && get_url_params("map") != "" && get_url_params("map")=="false") {
+          var skin_texture = textureLoader.load( "textures/skin/No-Map-Texture.jpg" );
 
-        //var mapSpecular = textureLoader.load( "models/gltf/LeePerrySmith/Map-SPEC.jpg" );
+          //Bump map for skin texture
+          var mapHeight = textureLoader.load( "textures/No-Map-Bump-Map.jpg" );
+
+          //Specular This is where faces could go
+          var mapSpecular = textureLoader.load( "" );
+
+          //Emissive settings, though intensity doesn't seem to do anything.
+          var mapEmissive = textureLoader.load( "" );
+
+        } else {
+          var skin_texture = textureLoader.load( "textures/skin/Skin_Map_greyblue_greenshadow_3_20_2019.jpg" );
+
+          //Bump map for skin texture
+          var mapHeight = textureLoader.load( "textures/skin/Skin_Map_greyscale_greenshadow3_21_2019.jpg" );
+
+          //Specular This is where faces could go
+          var mapSpecular = textureLoader.load( "textures/skin/Skin_Map_Rivers6.jpg" );
+
+          //Emissive settings, though intensity doesn't seem to do anything.
+          var mapEmissive = textureLoader.load( "textures/skin/Skin_Map_Rivers8.jpg" );
+
+        }
+        material.map = skin_texture;
+
+
+        //Specular This is where faces could go
+
         mapSpecular.anisotropy = 4;
         mapSpecular.wrapS = mapSpecular.wrapT = THREE.RepeatWrapping;
         mapSpecular.format = THREE.RGBFormat;
@@ -470,48 +494,19 @@
 
 
         //Emissive settings, though intensity doesn't seem to do anything.
-        var mapEmissive = textureLoader.load( "textures/skin/Skin_Map_Rivers8.jpg" );
+
         material.emissive = new THREE.Color( 0x00213B);//0x85702F);//85702F this is the veiny one ); //latest with Caitlin 4286A6// 0B2624 //331C52 //660B14 //662B1A //782329 //002C4F
         material.emissiveMap = mapEmissive;
 
 
 
-        // Weird skin texture
-        //several test DIVERSIONS
-        switch(get_url_params("texture")) {
-          case "Skin_Map_Light_Blue_3_8_2019.jpg":
-          var skin_texture = textureLoader.load( "textures/skin/Skin_Map_Light_Blue_3_8_2019.jpg" );
-          break;
-          case "Skin_Map_Blue_3_8_2019.jpg":
-          var skin_texture = textureLoader.load( "textures/skin/Skin_Map_Blue_3_8_2019.jpg" );
-          break;
-          case "Skin_skintone_W_Map.jpg":
-          var skin_texture = textureLoader.load( "textures/skin/Skin_skintone_W_Map.jpg" );
-          break;
-          case "Skin_W_Map2.jpg":
-          var skin_texture = textureLoader.load( "textures/skin/Skin_W_Map2.jpg" );
-          break;
-          default:
-          var skin_texture = textureLoader.load( "textures/skin/Skin_Map_greyblue_greenshadow_3_20_2019.jpg" );
-
-        }
-
-        //var skin_texture = textureLoader.load( "textures/skin/Skin_Map_Low_Saturation_3_7_2019.jpg" );
-
-        //var skin_texture = textureLoader.load( "textures/skin/Skin_skintone_W_Map.jpg" );
-        //var skin_texture = new THREE.TextureLoader().load( "textures/skin/httpwww.photos-public-domain.com20110929skin_512x512.jpg" );
-        material.map = skin_texture;
-
-
-        //Bump map for skin texture
-        var mapHeight = textureLoader.load( "textures/skin/Skin_Map_greyscale_greenshadow3_21_2019.jpg" );
+        //Bump map settings for skin texture
         mapHeight.anisotropy = 4;
         mapHeight.wrapS = mapHeight.wrapT = THREE.RepeatWrapping;
         mapHeight.format = THREE.RGBFormat;
         material.bumpMap = mapHeight;
 
         material.transparent = false;
-
 
 
         // Sets the uniforms with the material values
