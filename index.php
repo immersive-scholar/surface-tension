@@ -23,7 +23,7 @@
   $data_dir = '/app/data';
   $relative_data_dir = 'data'; //the fact that I need this makes me sad. If I use the data_dir path it all works locally. But on my dreamhost, when this php script goes to finally load viz.html, viz.html can't find the file. If viz.html is handed a more relative path (no 'app' in relative_data_dir because viz.html is in app together with the data folder), it can indeed find it. I tried changing data_dir to just be relative and use that in javascript and below where we check for locally cached files. That broke checking for cached files. So now I guess we need two hardcoded directory path variables, one more relative for JavaScript viz.html and one less relative for index.php. Maybe index.php and app should be in the same folder.
 
-  $data_file_path = '/realtime-streamflow-'.date("Y-m-d-H-i").'.csv';//"Y-m-d-H-i-s" for real real time
+  $data_file_path = '/realtime-streamflow-'.date("Y-m-d-H").'.csv';//"Y-m-d-H-i-s" for real real time
 
   $filepath = $data_dir.$data_file_path;
   $more_relative_filepath = $relative_data_dir.$data_file_path;
