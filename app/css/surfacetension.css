@@ -29,6 +29,16 @@ body {
   height: 100%;
 }
 
+#meta a, a:link, a:visited {
+  color: LightCyan;
+  text-decoration: none;
+}
+
+#meta a:hover, a:active {
+  color: #fff;
+  text-decoration: none;
+}
+
 h3 {
   margin-bottom: 3em;
 }
@@ -36,4 +46,13 @@ h3 {
 #meta p {
   text-align: left;
   line-height: 1.5em;
+}
+
+#meta ul {
+  font-size: .75em;
+  list-style-type: none;
+  padding: 1.5em 0 0;
+  line-height: 1.5em;
+  margin: 0;
+  text-align: left;
 }
