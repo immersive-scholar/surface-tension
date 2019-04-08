@@ -2,6 +2,15 @@
 <html lang="en">
 <head>
   <title>Surface Tension by Caitlin & Misha</title>
+  <!--
+    Surface Tension
+    Reflections on real time streamflow
+    by Caitlin & Misha
+
+    Special thanks to NCSU Libraries, the Immersive Scholar Residency, the Andrew W. Mellon Foundation and the USGS Raleigh.
+
+    Built using data from the USGS, code from three.js, especially the webgl gpgu water and the bump mapping examples, D3 mapping code and examples, public domain photos, etc.
+  -->
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
   <link rel="stylesheet" type="text/css" href="css/surfacetension.css">
@@ -379,7 +388,7 @@
 
         var controls = new THREE.OrbitControls( camera, renderer.domElement );
         controls.enabled = false;
-        
+
         stats = new Stats();
         if (get_url_params("stats")=="on") container.appendChild( stats.dom ); //STATS TURNED OFF, will control with query string API
 
@@ -454,7 +463,7 @@
         // Material attributes from MeshPhongMaterial, correlates to 'diffuse' in uniforms settings
         material.color = new THREE.Color( 0xEBC4FF);// FFB0C0 );
 
-
+        //Skin textures from the public domain: httpwww.photos-public-domain.com20110929skin
         if (get_url_params("map") != undefined && get_url_params("map") != "" && get_url_params("map")=="false") {
           var skin_texture = textureLoader.load( "textures/skin/No-Map-Texture.jpg" );
 
