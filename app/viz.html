@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>NCSU Immersive Scholars Caitlin & Misha</title>
+  <title>Surface Tension by Caitlin & Misha</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
   <link rel="stylesheet" type="text/css" href="css/surfacetension.css">
@@ -23,7 +23,6 @@
   <script src="../build/three.js"></script>
   <script src="js/WebGL.js"></script>
   <script src="js/libs/stats.min.js"></script>
-  <script src="js/libs/dat.gui.min.js"></script>
   <script src="js/controls/OrbitControls.js"></script>
   <script src="js/SimplexNoise.js"></script>
 
@@ -379,7 +378,8 @@
         container.appendChild( renderer.domElement );
 
         var controls = new THREE.OrbitControls( camera, renderer.domElement );
-
+        controls.enabled = false;
+        
         stats = new Stats();
         if (get_url_params("stats")=="on") container.appendChild( stats.dom ); //STATS TURNED OFF, will control with query string API
 
@@ -922,7 +922,7 @@
         <h2>Reflections on real time streamflow</h2>
         <h3>by Caitlin & Misha</h3>
         <p>
-          This visualization maps streamflow data form the United States Geological Survey (USGS) in real time across the US. Water supports life but can also drown and destroy. People are mostly water, but the melting ice caps threaten our very existence. Harnessing this elemental force requires a balancing act and this artwork is a reflection on humanity's fraught relationship with freshwater.
+          This visualization maps streamflow data from the United States Geological Survey (USGS) in real time across the US. Water supports life but can also drown and destroy. People are mostly water, but the melting ice caps threaten our very existence. Harnessing this elemental force requires a balancing act and this artwork is a reflection on humanity's fraught relationship with freshwater.
         </p>
         <p>
           Special thanks to NCSU Libraries, the Immersive Scholar Residency, the Andrew W. Mellon Foundation and the USGS Raleigh.
