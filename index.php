@@ -7,11 +7,8 @@
   <?php
   //url query string parameter GET-style API options to possibly pass to the visualization
   $sidebar = filter_input(INPUT_GET, 'sidebar', FILTER_SANITIZE_URL);
-
   $sorting = filter_input(INPUT_GET, 'sorting', FILTER_SANITIZE_URL);
-
   $zoom = filter_input(INPUT_GET, 'zoom', FILTER_SANITIZE_URL);
-
   $map = filter_input(INPUT_GET, 'map', FILTER_SANITIZE_URL);
 
   echo '<h1>USGS Streamflow Data Cacher</h1>';
@@ -24,7 +21,7 @@
   }
   echo "\n";
   $data_dir = '/app/data';
-  $relative_data_dir = 'data'; //the fact that I need this makes me sad. If I use the data_dir path it all works locally. But on my dreamhost, when this php script goes to finally load viz.html, viz.html can't find the file. If viz.html is handed a more relative path (no 'app' in relative_data_dir because viz.html is in app together with the data folder), it can indeed find it. I tried changing data_dir to just be relative and use that in javascript and below where we check for locally cached files. That broke checking for cached files. So now I guess we need two hardcoded directory path variables, one more relative for JavaScript viz.html and one less relative for index.php. Maybe index.php and app should be in the same folder.
+  $relative_data_dir = 'data'; //the fact that we need to also have this path is not ideal. If I use the data_dir path it all works locally. But on dreamhost, when this php script goes to finally load viz.html, viz.html can't find the file. If viz.html is handed a more relative path (no 'app' in relative_data_dir because viz.html is in app together with the data folder), it can indeed find it. I tried changing data_dir to just be relative and use that in javascript and below where we check for locally cached files. That broke checking for cached files. So now I guess we need two hardcoded directory path variables, one more relative for JavaScript viz.html and one less relative for index.php. Maybe index.php and app should be in the same folder.
 
   $data_file_path = '/realtime-streamflow-'.date("Y-m-d-H").'.csv';//"Y-m-d-H-i-s" for real real time
 
@@ -36,12 +33,11 @@
   echo '<h2>Scanning for:</h2>';echo "\n";
   echo '<h3>'.$filepath.'</h3>';echo "\n";
 
-  //does the file for today exist?
+  //does the file for today, or this hour, exist?
+  //then don't redownload
+  //otherwise download it but if it fails use a previous one
 
-  //then don't redownload interface
-  //otherwise download it but if it fails use a previous one?
-
-  //PHP is a pretty terrible language that requires the clearing of a cache just to see if a file exists http://php.net/manual/en/function.clearstatcache.php
+  //PHP requires the clearing of a cache just to see if a file exists http://php.net/manual/en/function.clearstatcache.php
   clearstatcache();
 
   if (file_exists('.'.$filepath)) {
@@ -53,27 +49,20 @@
     echo "<h3>No cached data for today.</h3>";echo "\n";
     //load the file from usgs.
     //if response code is 200, cache this file and load vis with this file as parameter
-    //if response is not 200, don't cache the file and load vis with a previously cached file as ReflectionParameter
+    //if response is not 200, don't cache the file and load vis with a previously cached file
 
     $url = "https://waterwatch.usgs.gov/webservices/realtime?format=csv";
-    //$url = "http://misharabinovich.com/asd";
     // This is where the file will be saved
     $fp = fopen(dirname(__FILE__).$tempdata, 'w+');
     // Replace spaces with %20 on the URL string
     $ch = curl_init(str_replace(" ","%20", $url));
     // We allow cURL to run for max 600 seconds, more info https://curl.haxx.se/libcurl/c/CURLOPT_TIMEOUT.html
-    //In theory leaving it 0 can allow it to not time out, but in practice I found that this breaks the process and a file of 0 bytes is written for some dumb php reason
+    //In theory leaving it 0 can allow it to not time out, but in practice I found that this breaks the process and a file of 0 bytes is written for some php reason
     curl_setopt($ch, CURLOPT_TIMEOUT, 600);
     // Write curl response to file
     curl_setopt($ch, CURLOPT_FILE, $fp);
     // Follow locations
     curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-
-    //Trying to reset pho curl option overrides as described in https://stackoverflow.com/questions/27088070/curl-works-from-terminal-but-not-from-php
-    //curl_setopt($ch, CURLOPT_DNS_CACHE_TIMEOUT, 60);
-    //curl_setopt($ch, CURLOPT_DNS_USE_GLOBAL_CACHE, 0);
-    //curl_setopt($ch, CURLOPT_MAXREDIRS, -1);
-    //curl_setopt($ch, CURLOPT_NOSIGNAL, 0);
 
     // Get curl response
     $output = curl_exec($ch);
@@ -82,14 +71,13 @@
     $http_respond = trim( strip_tags( $http_respond ) );
     $http_code = curl_getinfo( $ch, CURLINFO_HTTP_CODE );
 
-
     // Close curl handle
     curl_close($ch);
     // Close file handle
     fclose($fp);
 
     echo $url;
-    //show only if there is something to show e.g. 404 barf
+    //show only if there is something to show e.g. 404 response
     if ($http_respond != "") {
       echo '<p><b>http_respond:</b> '.$http_respond.'</p>';echo "\n";
     }
@@ -103,11 +91,11 @@
         echo "<p><span class='bad'>ERROR copying temp file into new cached file!</span></p>";
       } else {
         //*******************************************************************************************************************************************************************************
-        //copying worked! Load viz with new cache file
+        //copying worked. Load viz with new cached file
         load_viz($more_relative_filepath, $sorting, $sidebar, $zoom, $map);
       }
     } else {
-      //Can't load data, use previous cached file
+      //Can't load data, use previously cached file
       echo '<p>Find Last Cached File</p>';
       echo "<ul>";
       $last_cached_file = scan_dir(dirname(__FILE__).$data_dir);
