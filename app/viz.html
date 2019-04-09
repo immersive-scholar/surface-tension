@@ -463,9 +463,9 @@
 
         //Skin textures from the public domain: httpwww.photos-public-domain.com20110929skin
         if (get_url_params("map") != undefined && get_url_params("map") != "" && get_url_params("map")=="false") {
-          var skin_texture = textureLoader.load( "textures/skin/No-Map-Texture.jpg" );
+          var skin_texture = textureLoader.load( "img/textures/skin/No-Map-Texture.jpg" );
           //Bump map for skin texture
-          var mapHeight = textureLoader.load( "textures/No-Map-Bump-Map.jpg" );
+          var mapHeight = textureLoader.load( "img/textures/No-Map-Bump-Map.jpg" );
           //Specular
           var mapSpecular = textureLoader.load( "" );
           //Emissive
@@ -473,7 +473,7 @@
 
         } else {
 
-          var skin_texture = textureLoader.load( "textures/skin/Skin_Map_greyblue_greenshadow_3_20_2019.jpg",
+          var skin_texture = textureLoader.load( "img/textures/skin/Skin_Map_greyblue_greenshadow_3_20_2019.jpg",
             function(texture){
 
               material.specular = new THREE.Color( 0x660B14);
@@ -488,11 +488,11 @@
             } );
 
           //Bump map for skin texture
-          var mapHeight = textureLoader.load( "textures/skin/Skin_Map_greyscale_greenshadow4_04_2019.jpg" );
+          var mapHeight = textureLoader.load( "img/textures/skin/Skin_Map_greyscale_greenshadow4_04_2019.jpg" );
           //Specular
-          var mapSpecular = textureLoader.load( "textures/skin/Skin_Map_Rivers6.jpg" );
+          var mapSpecular = textureLoader.load( "img/textures/skin/Skin_Map_Rivers6.jpg" );
           //Emissive
-          var mapEmissive = textureLoader.load( "textures/skin/Skin_Map_Rivers8.jpg" );
+          var mapEmissive = textureLoader.load( "img/textures/skin/Skin_Map_Rivers8.jpg" );
 
         }
         material.map = skin_texture;
@@ -932,15 +932,21 @@
         <p>
           This visualization maps streamflow data from the United States Geological Survey (USGS) in real time across the US. Water supports life but can also drown and destroy. People are mostly water, but the melting ice caps threaten our very existence. Harnessing this elemental force requires a balancing act and this artwork is a reflection on humanity's fraught relationship with freshwater.
         </p>
-        <p>
+        <p class="padded-p">
           Special thanks to NCSU Libraries, the Immersive Scholar Residency, the Andrew W. Mellon Foundation and the USGS Raleigh.
         </p>
 
-          <ul>
-            <li><a href="https://caitlinandmisha.com" title="Caitlin & Misha Homepage">caitlinandmisha.com</a></li>
-            <li><a href="https://www.immersivescholar.org/" title="Immersive Scholar">immersivescholar.org</a></li>
-            <li><a href="https://www.lib.ncsu.edu/" title="Libraries of NC State">lib.ncsu.edu</a></li>
-          </ul>
+        <div id="im_logo">
+          <img src="img/Imm-Sch-Logo-White.png">
+        </div>
+
+        <ul>
+          <li><a href="https://caitlinandmisha.com" title="Caitlin & Misha Homepage">caitlinandmisha.com</a></li>
+          <li><a href="https://www.immersivescholar.org/" title="Immersive Scholar">immersivescholar.org</a></li>
+          <li><a href="https://www.lib.ncsu.edu/" title="Libraries of NC State">lib.ncsu.edu</a></li>
+        </ul>
+
+
 
 
       </div>

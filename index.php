@@ -33,7 +33,7 @@
   echo '<h2>Scanning for:</h2>';echo "\n";
   echo '<h3>'.$filepath.'</h3>';echo "\n";
 
-  //does the file for today, or this hour, exist?
+  //does the file for this hour exist?
   //then don't redownload
   //otherwise download it but if it fails use a previous one
 
@@ -41,12 +41,12 @@
   clearstatcache();
 
   if (file_exists('.'.$filepath)) {
-    echo "<h3><span class='good'>Cached data for today was found.</span></h3>";echo "\n";
+    echo "<h3><span class='good'>Cached data for this hour was found.</span></h3>";echo "\n";
     //load visualization and pass it this file's name as a parameter;
     //*******************************************************************************************************************************************************************************
     load_viz($more_relative_filepath, $sorting, $sidebar, $zoom, $map);
   } else {
-    echo "<h3>No cached data for today.</h3>";echo "\n";
+    echo "<h3>No cached data for this hour.</h3>";echo "\n";
     //load the file from usgs.
     //if response code is 200, cache this file and load vis with this file as parameter
     //if response is not 200, don't cache the file and load vis with a previously cached file
