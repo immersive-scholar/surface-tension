@@ -358,9 +358,15 @@
 
         var hheight = (BOUNDS - zoom_margin)*the_zoom; //To tune the display, a unique zoom parameter can now be requested by url parameter (via the data cacher php app or manually)
         var wwidth = (BOUNDS - zoom_margin)*the_zoom;
-        var fov = 2 * Math.atan( ( wwidth / (window.innerWidth * viz_scaler  / window.innerHeight) ) / ( 2 * dist ) ) * ( 180 / Math.PI ); // in degrees, matching bounding box by width
 
-        //fov = 2 * Math.atan( hheight / ( 2 * dist ) ) * ( 180 / Math.PI ); //by height
+
+        if (window.innerWidth * viz_scaler >= window.innerHeight) {
+          var fov = 2 * Math.atan( ( wwidth / (window.innerWidth * viz_scaler  / window.innerHeight) ) / ( 2 * dist ) ) * ( 180 / Math.PI ); // in degrees, matching bounding box by width
+        } else {
+          fov = 2 * Math.atan( hheight / ( 2 * dist ) ) * ( 180 / Math.PI ); //by height
+        }
+
+
         return fov;
       }
 
