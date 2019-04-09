@@ -455,9 +455,7 @@
         } );
 
         material.lights = true;
-        var loadingManager = new THREE.LoadingManager( function () {
-        } );
-        var textureLoader = new THREE.TextureLoader( loadingManager );
+        var textureLoader = new THREE.TextureLoader();
 
 
         // Material attributes from MeshPhongMaterial, correlates to 'diffuse' in uniforms settings
@@ -466,48 +464,50 @@
         //Skin textures from the public domain: httpwww.photos-public-domain.com20110929skin
         if (get_url_params("map") != undefined && get_url_params("map") != "" && get_url_params("map")=="false") {
           var skin_texture = textureLoader.load( "textures/skin/No-Map-Texture.jpg" );
-
           //Bump map for skin texture
           var mapHeight = textureLoader.load( "textures/No-Map-Bump-Map.jpg" );
-
-          //Specular This is where faces could go
+          //Specular
           var mapSpecular = textureLoader.load( "" );
-
-          //Emissive settings, though intensity doesn't seem to do anything.
+          //Emissive
           var mapEmissive = textureLoader.load( "" );
 
         } else {
-          var skin_texture = textureLoader.load( "textures/skin/Skin_Map_greyblue_greenshadow_3_20_2019.jpg" );
+
+          var skin_texture = textureLoader.load( "textures/skin/Skin_Map_greyblue_greenshadow_3_20_2019.jpg",
+            function(texture){
+
+              material.specular = new THREE.Color( 0x660B14);
+              material.uniforms[ "specular" ].value = material.specular;
+
+              material.emissive = new THREE.Color( 0x5E0D00);
+              material.uniforms["emissive"].value = material.emissive;
+            },
+            undefined,
+            function(err) {
+              console.error("Can't load skin texture")
+            } );
 
           //Bump map for skin texture
           var mapHeight = textureLoader.load( "textures/skin/Skin_Map_greyscale_greenshadow4_04_2019.jpg" );
-
-          //Specular This is where faces could go
+          //Specular
           var mapSpecular = textureLoader.load( "textures/skin/Skin_Map_Rivers6.jpg" );
-
-          //Emissive settings, though intensity doesn't seem to do anything.
+          //Emissive
           var mapEmissive = textureLoader.load( "textures/skin/Skin_Map_Rivers8.jpg" );
 
         }
         material.map = skin_texture;
 
-
-        //Specular This is where faces could go
-
         mapSpecular.anisotropy = 4;
         mapSpecular.wrapS = mapSpecular.wrapT = THREE.RepeatWrapping;
         mapSpecular.format = THREE.RGBFormat;
-        material.specular = new THREE.Color( 0x660B14);
+        material.specular = new THREE.Color( 0x000000);
         material.shininess = 7;
         material.specularMap = mapSpecular;
 
-
         //Emissive settings, though intensity doesn't seem to do anything.
 
-        material.emissive = new THREE.Color( 0x5E0D00);
+        material.emissive = new THREE.Color( 0x000000);
         material.emissiveMap = mapEmissive;
-
-
 
         //Bump map settings for skin texture
         mapHeight.anisotropy = 4;
@@ -535,7 +535,6 @@
         material.uniforms[ "bumpMap" ].value = material.bumpMap;
 
         //material.uniforms[ "opacity" ].value = 1;//material.opacity;
-
 
 
         // Defines
@@ -801,7 +800,7 @@
       Papa.parse(file, {
         download: true,
         complete: function(results){
-          console.log("Finished:", results.data.length)
+          console.log("Loaded: data from", results.data.length, "USGS stations")
 
           var streamflow_column;
           var streamflow_column_name;
