@@ -40,11 +40,13 @@ body {
 
 h1 {
     font-family: 'Arvo', serif;
+    font-variant: small-caps;
 }
 
 h2 {
-  font-size: 1.4em;
+  font-size: 1.3em;
   margin-bottom: 0.3em;
+  font-variant: small-caps;
 }
 
 h3 {

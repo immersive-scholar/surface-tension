@@ -19,7 +19,7 @@
     @import url('https://fonts.googleapis.com/css?family=Arvo|Asap');
   </style>
 
-  <script src="lib/d3.v3.min.js">//http://d3js.org/</script>
+  <script src="lib/d3.v3.min.js"></script>
   <script src="lib/topojson.v1.min.js"></script>
   <script src="lib/papaparse.js"></script>
 
@@ -341,11 +341,10 @@
 
 
         if (get_url_params("sidebar")!=undefined && get_url_params("sidebar")!="") {
-          //to filt sideboar with text to show meta info plus as a workaround to really wide but short displays
+          //sideboar with text to show meta info
           var sidebarsize = parseFloat(get_url_params("sidebar"));
-          console.log("side bar "+sidebarsize)
           if (sidebarsize <= 0 || sidebarsize >= 100) {
-            console.log("Sidebar width must be above 0 and below 100 (percent)");
+            console.error("Sidebar width must be above 0 and below 100 (percent)");
             //sidebar is too small or too big
           } else {
             var main_size = 100 - sidebarsize;
@@ -354,19 +353,19 @@
 
         }
 
-        var zoom_margin = 20;
+        var zoom_margin = 20; //20 this is to make sure sides of the webgl canvas are not visible when they get exposed by blobulation
         // Calculate the camera distance https://stackoverflow.com/questions/14614252/how-to-fit-camera-to-object
         var dist = 200;
 
-        var the_zoom = 0.42; //This setting is only good as default for Immersion Theater wall
+        var the_zoom = 1;
         var requested_zoom = get_url_params("zoom");
-        if (requested_zoom!=undefined && requested_zoom!="" && requested_zoom >= 0 && requested_zoom <= 1) the_zoom = parseFloat(requested_zoom);
+        if (requested_zoom!=undefined && requested_zoom!="" && requested_zoom >= 0 && requested_zoom <= 3) the_zoom = parseFloat(requested_zoom);
 
-        var hheight = (BOUNDS - zoom_margin)*the_zoom; //for full texture bounding box in a crazy wide aspect ratio hheight would work but a bit zoomed out. The magic number .42 is a default tuning for two of the visualization walls. Otherwise a unique zoom parameter can now be requested by the data cacher php app
-        var wwidth = BOUNDS - zoom_margin;
-        //var fov = 2 * Math.atan( ( wwidth / (window.innerWidth  / window.innerHeight) ) / ( 2 * dist ) ) * ( 180 / Math.PI ); // in degrees, matching bounding box by width
+        var hheight = (BOUNDS - zoom_margin)*the_zoom; //To tune the display, a unique zoom parameter can now be requested by url parameter (via the data cacher php app or manually)
+        var wwidth = (BOUNDS - zoom_margin)*the_zoom;
+        var fov = 2 * Math.atan( ( wwidth / (window.innerWidth * viz_scaler  / window.innerHeight) ) / ( 2 * dist ) ) * ( 180 / Math.PI ); // in degrees, matching bounding box by width
 
-        fov = 2 * Math.atan( hheight / ( 2 * dist ) ) * ( 180 / Math.PI );
+        //fov = 2 * Math.atan( hheight / ( 2 * dist ) ) * ( 180 / Math.PI ); //by height
 
         camera = new THREE.PerspectiveCamera( fov, window.innerWidth * viz_scaler / window.innerHeight, 1, 3000 );
         camera.position.set( 0, dist, 0 );
@@ -377,7 +376,7 @@
         sun.position.set( 300, 400, 175 );
         scene.add( sun );
 
-        var sun2 = new THREE.DirectionalLight( 0xFFFFFF, 1.3 ); //0xFFF272
+        var sun2 = new THREE.DirectionalLight( 0xFFFFFF, 1.3 );
         sun2.position.set( - 100, 350, - 200 );
         scene.add( sun2 );
 
@@ -392,20 +391,12 @@
         stats = new Stats();
         if (get_url_params("stats")=="on") container.appendChild( stats.dom ); //STATS TURNED OFF, will control with query string API
 
-        document.addEventListener( 'mousemove', onDocumentMouseMove, false );
-        document.addEventListener( 'touchstart', onDocumentTouchStart, false );
-        document.addEventListener( 'touchmove', onDocumentTouchMove, false );
 
         document.addEventListener( 'keydown', function ( event ) {
-
-          // W Pressed: Toggle wireframe
-          if ( event.keyCode === 87 ) {
-
-            waterMesh.material.wireframe = ! waterMesh.material.wireframe;
-            waterMesh.material.needsUpdate = true;
-
+          // S Pressed: Toggle stats
+          if ( event.keyCode === 83 ) {
+            if (!container.contains(stats.dom)) { container.appendChild( stats.dom ); } else { container.removeChild(stats.dom) }
           }
-
         }, false );
 
         window.addEventListener( 'resize', onWindowResize, false );
@@ -428,12 +419,9 @@
 
         valuesChanger();
 
-
-        if (viz_scaler < 1) {
-          document.getElementById("SurfaceTension").style.width = String(viz_scaler * 100.0)+"%";
-          document.getElementById("SurfaceTension").childNodes.item("canvas").style.width = "100%";
-
-        }
+        //this is needed if there is a sidebar and the window is resized
+        document.getElementById("SurfaceTension").style.width = String(viz_scaler * 100.0)+"%";
+        document.getElementById("SurfaceTension").childNodes.item("canvas").style.width = "100%";
       }
 
 
@@ -459,12 +447,12 @@
 
 
         // Material attributes from MeshPhongMaterial, correlates to 'diffuse' in uniforms settings
-        material.color = new THREE.Color( 0xEBC4FF);// FFB0C0 );
+        material.color = new THREE.Color( 0xEBC4FF);
 
-        //Skin textures from the public domain: httpwww.photos-public-domain.com20110929skin
+        //Original texture is from the public domain: httpwww.photos-public-domain.com20110929skin
         if (get_url_params("map") != undefined && get_url_params("map") != "" && get_url_params("map")=="false") {
           var skin_texture = textureLoader.load( "img/textures/skin/No-Map-Texture.jpg" );
-          //Bump map for skin texture
+          //Bump map
           var mapHeight = textureLoader.load( "img/textures/No-Map-Bump-Map.jpg" );
           //Specular
           var mapSpecular = textureLoader.load( "" );
@@ -487,7 +475,7 @@
               console.error("Can't load skin texture")
             } );
 
-          //Bump map for skin texture
+          //Bump map
           var mapHeight = textureLoader.load( "img/textures/skin/Skin_Map_greyscale_greenshadow4_04_2019.jpg" );
           //Specular
           var mapSpecular = textureLoader.load( "img/textures/skin/Skin_Map_Rivers6.jpg" );
@@ -504,12 +492,12 @@
         material.shininess = 7;
         material.specularMap = mapSpecular;
 
-        //Emissive settings, though intensity doesn't seem to do anything.
+        //Emissive settings
 
         material.emissive = new THREE.Color( 0x000000);
         material.emissiveMap = mapEmissive;
 
-        //Bump map settings for skin texture
+        //Bump map settings
         mapHeight.anisotropy = 4;
         mapHeight.wrapS = mapHeight.wrapT = THREE.RepeatWrapping;
         mapHeight.format = THREE.RGBFormat;
@@ -533,8 +521,6 @@
         material.uniforms[ "map" ].value = material.map;
 
         material.uniforms[ "bumpMap" ].value = material.bumpMap;
-
-        //material.uniforms[ "opacity" ].value = 1;//material.opacity;
 
 
         // Defines
@@ -579,9 +565,7 @@
 
         var error = gpuCompute.init();
         if ( error !== null ) {
-
           console.error( error );
-
         }
 
         // Create compute shader to smooth the water surface and velocity
@@ -672,12 +656,14 @@
       }
 
       function onWindowResize() {
+
         camera.aspect = window.innerWidth * viz_scaler / window.innerHeight;
         camera.updateProjectionMatrix();
 
         renderer.setSize( window.innerWidth, window.innerHeight );
 
         document.getElementById("SurfaceTension").childNodes.item("canvas").style.width = "100%";
+        console.log('resizing');
 
       }
 
@@ -685,38 +671,6 @@
         mouseCoords.set( ( x / renderer.domElement.clientWidth ) * 2 - 1, - ( y / renderer.domElement.clientHeight ) * 2 + 1 );
 
         mouseMoved = true;
-
-      }
-
-      function onDocumentMouseMove( event ) {
-
-        //setMouseCoords( event.clientX, event.clientY );
-
-      }
-
-      function onDocumentTouchStart( event ) {
-
-        if ( event.touches.length === 1 ) {
-
-          event.preventDefault();
-
-          //setMouseCoords( event.touches[ 0 ].pageX, event.touches[ 0 ].pageY );
-
-
-        }
-
-      }
-
-      function onDocumentTouchMove( event ) {
-
-        if ( event.touches.length === 1 ) {
-
-          event.preventDefault();
-
-          //setMouseCoords( event.touches[ 0 ].pageX, event.touches[ 0 ].pageY );
-
-
-        }
 
       }
 
@@ -753,9 +707,7 @@
 
         } else {
 
-          //uniforms[ "mousePos" ].value.set( 10000, 10000 );
-          //move_point = {x:parseInt(Math.random()*512-256),z:parseInt(Math.random()*512-256)}
-          var point = move_point;//intersects[ 0 ].point;
+          var point = move_point;
           if (point != undefined) {
             uniforms[ "mousePos" ].value.set( point.x, point.z );
           }
@@ -807,7 +759,7 @@
 
           streamflow_column_name = get_url_params("streamflow_column_name");
 
-          //if streaflow column name argument is allowed, find it's index and use it
+          //white list for sorting by column
           if (["percentile", "class", "stage", "flow", "percent_median", "percent_mean"].includes(streamflow_column_name)) {
             streamflow_column = the_data.data[0].indexOf(streamflow_column_name);
 
@@ -843,10 +795,10 @@
             return 0;
           }
 
-          the_sorted_data = the_data.data;//.sort(Comparator)
+          the_sorted_data = the_data.data;
           the_sorted_data.sort(Sorter);
 
-          var column_data_max = 0.0; //if using something other than percentile (which is already 0-100), we need to figure out comparative percentage of stage so need stage max
+          var column_data_max = 0.0; //if using something other than percentile (which is already 0-100), we need to figure out comparative percentage (e.g. of stage so need stage max)
           var column_data_min = 0.0;
           for (var i=1; i<the_data.data.length; i++) {
             column_data_max = parseFloat(the_data.data[i][streamflow_column]) > column_data_max ? the_data.data[i][streamflow_column] : column_data_max;
@@ -863,7 +815,6 @@
 
             if (get_url_params("sorting") == "percentile") {
               if (the_count >= the_data.data.length-1) {
-                console.log("RESET")
                 the_count = 1;
               } else {
                 the_count+=1;
@@ -873,9 +824,6 @@
             } else {
               data_point = 1 + parseInt(Math.random()*(the_data.data.length-1)); //random data points excluding element 0 which are columns in the csv
             }
-            //data_point =1 + parseInt(Math.random()*the_count); //random within a window bounded by the_count
-
-            //console.log(data_point+ " "+parseFloat(the_data.data[data_point][streamflow_column]));
             var coords = projection([the_data.data[data_point][3],the_data.data[data_point][2]]);
             //cities data
             if (file == "data/uscitiesv1.4.csv") {
@@ -927,7 +875,6 @@
       <div id="meta">
 
         <h1>Surface Tension</h1>
-        <h2>Reflections on real time streamflow</h2>
         <h3>by Caitlin & Misha</h3>
         <p>
           This visualization maps streamflow data from the United States Geological Survey (USGS) in real time across the US. Water supports life but can also drown and destroy. People are mostly water, but the melting ice caps threaten our very existence. Harnessing this elemental force requires a balancing act and this artwork is a reflection on humanity's fraught relationship with freshwater.
@@ -943,7 +890,7 @@
         <ul>
           <li><a href="https://caitlinandmisha.com" title="Caitlin & Misha Homepage">caitlinandmisha.com</a></li>
           <li><a href="https://www.immersivescholar.org/" title="Immersive Scholar">immersivescholar.org</a></li>
-          <li><a href="https://www.lib.ncsu.edu/" title="Libraries of NC State">lib.ncsu.edu</a></li>
+          <li><a href="https://www.usgs.gov/" title="USGS">usgs.gov</a></li>
         </ul>
 
 
