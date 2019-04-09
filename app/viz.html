@@ -274,6 +274,7 @@
       var move_point;
       var ValuesChanger;
       var viz_scaler = 1;
+      var dist = 200;
 
 
       //https://stackoverflow.com/questions/831030/how-to-get-get-request-parameters-in-javascript
@@ -333,13 +334,7 @@
       init();
       animate();
 
-      function init() {
-
-        container = document.createElement( 'div' );
-        container.setAttribute("id", "SurfaceTension");
-        document.body.appendChild( container );
-
-
+      function calculateFov() {
         if (get_url_params("sidebar")!=undefined && get_url_params("sidebar")!="") {
           //sideboar with text to show meta info
           var sidebarsize = parseFloat(get_url_params("sidebar"));
@@ -355,7 +350,7 @@
 
         var zoom_margin = 20; //20 this is to make sure sides of the webgl canvas are not visible when they get exposed by blobulation
         // Calculate the camera distance https://stackoverflow.com/questions/14614252/how-to-fit-camera-to-object
-        var dist = 200;
+
 
         var the_zoom = 1;
         var requested_zoom = get_url_params("zoom");
@@ -366,7 +361,17 @@
         var fov = 2 * Math.atan( ( wwidth / (window.innerWidth * viz_scaler  / window.innerHeight) ) / ( 2 * dist ) ) * ( 180 / Math.PI ); // in degrees, matching bounding box by width
 
         //fov = 2 * Math.atan( hheight / ( 2 * dist ) ) * ( 180 / Math.PI ); //by height
+        return fov;
+      }
 
+      function init() {
+
+        container = document.createElement( 'div' );
+        container.setAttribute("id", "SurfaceTension");
+        document.body.appendChild( container );
+
+        var dist = 200;
+        var fov = calculateFov(dist);
         camera = new THREE.PerspectiveCamera( fov, window.innerWidth * viz_scaler / window.innerHeight, 1, 3000 );
         camera.position.set( 0, dist, 0 );
 
@@ -657,13 +662,14 @@
 
       function onWindowResize() {
 
-        camera.aspect = window.innerWidth * viz_scaler / window.innerHeight;
+        camera.aspect = window.innerWidth / window.innerHeight * viz_scaler ;
+        camera.fov = calculateFov();
         camera.updateProjectionMatrix();
 
         renderer.setSize( window.innerWidth, window.innerHeight );
 
+        //this is to deal with any sidebar that might be there
         document.getElementById("SurfaceTension").childNodes.item("canvas").style.width = "100%";
-        console.log('resizing');
 
       }
 
