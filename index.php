@@ -23,7 +23,7 @@
   $data_dir = '/app/data';
   $relative_data_dir = 'data'; //the fact that we need to also have this path is not ideal. If I use the data_dir path it all works locally. But on dreamhost, when this php script goes to finally load viz.html, viz.html can't find the file. If viz.html is handed a more relative path (no 'app' in relative_data_dir because viz.html is in app together with the data folder), it can indeed find it. I tried changing data_dir to just be relative and use that in javascript and below where we check for locally cached files. That broke checking for cached files. So now I guess we need two hardcoded directory path variables, one more relative for JavaScript viz.html and one less relative for index.php. Maybe index.php and app should be in the same folder.
 
-  $data_file_path = '/realtime-streamflow-'.date("Y-m-d-H").'.csv';//"Y-m-d-H-i-s" for real real time
+  $data_file_path = '/realtime-streamflow-'.date("Y-m-d").'.csv';//"Y-m-d-H-i-s" for real real time
 
   $filepath = $data_dir.$data_file_path;
   $more_relative_filepath = $relative_data_dir.$data_file_path;
@@ -33,7 +33,7 @@
   echo '<h2>Scanning for:</h2>';echo "\n";
   echo '<h3>'.$filepath.'</h3>';echo "\n";
 
-  //does the file for this hour exist?
+  //does the file for this day exist?
   //then don't redownload
   //otherwise download it but if it fails use a previous one
 
@@ -41,12 +41,12 @@
   clearstatcache();
 
   if (file_exists('.'.$filepath)) {
-    echo "<h3><span class='good'>Cached data for this hour was found.</span></h3>";echo "\n";
+    echo "<h3><span class='good'>Cached data for this day was found.</span></h3>";echo "\n";
     //load visualization and pass it this file's name as a parameter;
     //*******************************************************************************************************************************************************************************
     load_viz($more_relative_filepath, $sorting, $sidebar, $zoom, $map);
   } else {
-    echo "<h3>No cached data for this hour.</h3>";echo "\n";
+    echo "<h3>No cached data for this day.</h3>";echo "\n";
     //load the file from usgs.
     //if response code is 200, cache this file and load vis with this file as parameter
     //if response is not 200, don't cache the file and load vis with a previously cached file
