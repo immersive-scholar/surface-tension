@@ -4,11 +4,15 @@ html, body, div#meta {
 body {
   margin: 0px;
   overflow: hidden;
-  font-family:Monospace;
-  font-size:.8vw; //.9vw for art wall
+  font-size:.8vw;
   text-align:center;
-  text-align:center;
-  font-family: 'Asap', sans-serif;
+  font-family: 'Asap', Helvetica, sans-serif;
+}
+
+@media (max-aspect-ratio: 5760/2304) { /* For immersive scholar Art wall at Hunt library */
+  body {
+    font-size: .9vw;
+  }
 }
 
 .dg {
@@ -39,7 +43,7 @@ body {
 }
 
 h1 {
-    font-family: 'Arvo', serif;
+    font-family: 'Arvo', Futura, serif;
     font-variant: small-caps;
 }
 
