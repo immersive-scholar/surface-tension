@@ -274,6 +274,8 @@
       var ValuesChanger;
       var viz_scaler = 1;
       var dist = 200;
+      var d3_scaler = 800; //scale projection to produce the right borders around country for making texture image with wide borders (so ocean can be shown on the sides of the continent on a really wide aspect ratios)
+      var d3_default_scaler = 1000; //not sure why d3 has default scaling value at 1000?
 
 
       //https://stackoverflow.com/questions/831030/how-to-get-get-request-parameters-in-javascript
@@ -351,7 +353,8 @@
         // Calculate the camera distance https://stackoverflow.com/questions/14614252/how-to-fit-camera-to-object
 
 
-        var the_zoom = 1;
+        var the_zoom = d3_scaler / d3_default_scaler; //default zoom based on D3 projection settings
+
         var requested_zoom = get_url_params("zoom");
         if (requested_zoom!=undefined && requested_zoom!="" && requested_zoom >= 0 && requested_zoom <= 3) the_zoom = parseFloat(requested_zoom);
 
@@ -736,19 +739,14 @@
 
       }
 
-      </script>
 
-
-      <script>
       //D3 Map Projection
 
-      var width = 960;
-      height = 600;
-      scaler = 800;
-      default_scaler = 1000; //not sure why the heck d3 has default scaling value at 1000?
+      var width = 960; //set the projection dimensions
+      var height = 600;
 
       var projection = d3.geo.albersUsa()
-      .scale([scaler])
+      .scale([d3_scaler])
       .translate([width/2, height/2]);
       //end of D3 stuff
 
@@ -887,7 +885,7 @@
         <h1>Surface Tension</h1>
         <h3>by Caitlin & Misha</h3>
         <p>
-          This visualization maps streamflow data from the United States Geological Survey (USGS) in real time across the US. Water supports life but can also drown and destroy. People are mostly water, but the melting ice caps threaten our very existence. Harnessing this elemental force requires a balancing act and this artwork is a reflection on humanity's fraught relationship with freshwater.
+          This visualization maps streamflow data from the United States Geological Survey in real time across the US. Water supports life but can also drown and destroy. People are mostly water, but the melting ice caps threaten our very existence. Harnessing this elemental force requires a balancing act and this artwork is a reflection on humanity's fraught relationship with freshwater.
         </p>
         <p class="padded-p">
           Special thanks to NC State Libraries, the Immersive Scholar Residency, the Andrew W. Mellon Foundation and the Raleigh USGS.
