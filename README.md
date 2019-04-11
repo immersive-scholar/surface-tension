@@ -26,7 +26,7 @@ sidebar in percent, (default 0), e.g.
 http://surface-tension.caitlinandmisha.com?sidebar=22
 `
 
-sorting using allowed USGS data columns, e.g.
+sorting using allowed USGS data columns (site_no, dec_lat_va, dec_long_va, huc_cd, flow, stage, class, percentile, percent_median, percent_mean), e.g.
 `
 http://surface-tension.caitlinandmisha.com?sidebar=22&sorting=dec_long_va
 `
