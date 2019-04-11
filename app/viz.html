@@ -910,6 +910,7 @@
         byline.appendChild(bylineText);
         if (get_url_params("map") != undefined && get_url_params("map") != "" && get_url_params("map")=="false") {
           byline.appendChild(document.createElement("br"));
+          byline.style.fontSize = ".6em";
         }
 
         byline.appendChild(document.createTextNode("surface-tension"))
