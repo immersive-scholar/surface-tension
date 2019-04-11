@@ -63,7 +63,11 @@ h3 {
 }
 
 #meta p.padded-p {
-  margin-bottom: 2em;
+  margin-bottom: 1em;
+}
+
+#meta p.padded-p a {
+  font-size: .75em;
 }
 
 #meta ul {
