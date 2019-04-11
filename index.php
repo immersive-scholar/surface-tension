@@ -125,11 +125,20 @@
     return ($files[0]) ? $files[0] : false;
   }
   function load_viz($pathy, $sorting, $sidebar, $zoom, $map){
-    echo "<a href='".$pathy."'>".$pathy."</a>";
-    echo "\n\n</body>";
-    echo "\n<script>setTimeout(function(){
-      window.location.href = 'app/viz.html?data=".$pathy."&sorting=".$sorting."&sidebar=".$sidebar."&zoom=".$zoom."&map=".$map."';
-    }, 3000)</script>";
+    echo "<span class='good'>".$pathy."</span>";
+    $redir_js = "\n<script>\n
+      setTimeout(function(){
+      \n\t\twindow.location.href = 'app/viz.html?data=".$pathy;
+
+    if ($sorting != "") { $redir_js .= "&sorting=".$sorting; }
+    if ($sidebar != "") { $redir_js .= "&sidebar=".$sidebar; }
+    if ($zoom != "") { $redir_js .= "&zoom=".$zoom; }
+    if ($map != "") { $redir_js .= "&map=".$map; }
+
+      //"&sorting=".$sorting."&sidebar=".$sidebar."&zoom=".$zoom."&map=".$map
+    $redir_js .= "';\n
+      }, 3000)\n</script>\n";
+    echo $redir_js;
   }
   ?>
 </body>
