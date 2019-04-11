@@ -2,6 +2,15 @@
 <head>
   <title>USGS Data Cacher</title>
   <link rel="stylesheet" type="text/css" href="app/css/global.css">
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-21385959-2"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-21385959-2');
+  </script>
 </head>
 <body>
   <?php

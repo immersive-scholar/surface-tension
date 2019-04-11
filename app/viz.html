@@ -24,6 +24,16 @@
 
   <script src="lib/logarithmic_scaler.js"></script>
 
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-21385959-2"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-21385959-2');
+  </script>
+
 
 </head>
 <body>
@@ -345,6 +355,7 @@
           } else {
             var main_size = 100 - sidebarsize;
             viz_scaler = window.innerWidth * main_size / 100.0 /window.innerWidth;
+
           }
 
         }
@@ -465,7 +476,7 @@
         if (get_url_params("map") != undefined && get_url_params("map") != "" && get_url_params("map")=="false") {
           var skin_texture = textureLoader.load( "img/textures/skin/No-Map-Texture.jpg" );
           //Bump map
-          var mapHeight = textureLoader.load( "img/textures/No-Map-Bump-Map.jpg" );
+          var mapHeight = textureLoader.load( "img/textures/skin/No-Map-Bump-Map.jpg" );
           //Specular
           var mapSpecular = textureLoader.load( "" );
           //Emissive
@@ -886,8 +897,27 @@
         return ( value - r1[ 0 ] ) * ( r2[ 1 ] - r2[ 0 ] ) / ( r1[ 1 ] - r1[ 0 ] ) + r2[ 0 ];
       }
 
-      </script>
+      if (get_url_params("sidebar")==undefined || get_url_params("sidebar")=="") {
 
+        var bylineDiv = document.createElement('div');
+        bylineDiv.setAttribute("id", "byline");
+        document.getElementById("SurfaceTension").appendChild(bylineDiv);
+
+        var byline = document.createElement('a');
+
+        var bylineText = document.createTextNode("caitlinandmisha.com/");
+
+        byline.appendChild(bylineText);
+        byline.appendChild(document.createElement("br"));
+        byline.appendChild(document.createTextNode("surface-tension"))
+
+
+        byline.title = "Information about Surface Tension (variant)";
+        byline.href = "https://caitlinandmisha.com/surface-tension";
+
+        document.getElementById("byline").appendChild(byline);
+      }
+      </script>
       <div id="meta">
 
         <h1>Surface Tension</h1>
@@ -904,7 +934,8 @@
         </div>
 
         <ul>
-          <li><a href="https://caitlinandmisha.com" title="Caitlin & Misha Homepage">caitlinandmisha.com</a></li>
+          <li><a href="https://caitlinandmisha.com" title="Caitlin & Misha Homepage">caitlinandmisha.com/
+            surface-tension</a></li>
           <li><a href="https://www.immersivescholar.org/" title="Immersive Scholar">immersivescholar.org</a></li>
           <li><a href="https://www.usgs.gov/" title="USGS">usgs.gov</a></li>
         </ul>
