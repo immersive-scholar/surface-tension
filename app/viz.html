@@ -754,29 +754,11 @@
       if (file == undefined)  var file = "data/uscitiesv1.4.csv";//"data/us_states.csv";
 
       var the_data;
-      var the_sorted_data;
-
 
       Papa.parse(file, {
         download: true,
         complete: function(results){
           console.log("Loaded: data from", results.data.length, "USGS stations")
-
-          var streamflow_column;
-          var streamflow_column_name;
-
-          streamflow_column_name = get_url_params("streamflow_column_name");
-
-          //white list for data columns
-          if (["percentile", "class", "stage", "flow", "percent_median", "percent_mean"].includes(streamflow_column_name)) {
-            streamflow_column = the_data.data[0].indexOf(streamflow_column_name);
-
-          } else {
-            //default values if nothing is provided in the url parameters
-            streamflow_column = 13;
-            streamflow_column_name = "percentile";
-          }
-
 
           //Filter out noncontiguous US places Hawaii, Pureto Rico, and Alaska because we are showing a less abstract continental map vs just USA, and these places don't really appear in this map
           function non_contiguous_land_filter(value) {
@@ -789,22 +771,46 @@
           }
           the_data = {"data": results.data.filter(non_contiguous_land_filter)};
 
+          var streamflow_column;
+          var streamflow_column_name;
+
+          //white list for data columns
+          if (["percentile", "class", "stage", "flow", "percent_median", "percent_mean"].includes(streamflow_column_name)) {
+            streamflow_column_name = get_url_params("streamflow_column_name");
+            streamflow_column = the_data.data[0].indexOf(streamflow_column_name);
+          } else {
+            //default values if nothing is provided in the url parameters
+            streamflow_column = 13;
+            streamflow_column_name = "percentile";
+          }
+
+          var sorting_column;
+          var sorting_column_name;
+
+          //sorting whitelist site_no, dec_lat_va, dec_long_va, huc_cd, flow, stage, class, percentile, percent_median, percent_mean
+          var sorting_whitelist = ["site_no", "dec_lat_va", "dec_long_va", "huc_cd", "flow", "stage", "class", "percentile", "percent_median", "percent_mean"];
+
+          if (sorting_whitelist.includes(get_url_params("sorting"))) {
+            sorting_column_name = get_url_params("sorting");
+            sorting_column = the_data.data[0].indexOf(sorting_column_name);
+          }
+
 
           function percentile_filter(value) {
-            if (value[streamflow_column].indexOf("0") == 0 || value[streamflow_column].indexOf(" ") == 0) return false;
+            if (value[streamflow_column].indexOf(" ") == 0) return false; //filter empty columns
             return true;
           }
 
           if (streamflow_column_name == "percentile") the_data = {"data": the_data.data.filter(percentile_filter)}
 
           function Sorter(a, b){
-            if (parseFloat(a[streamflow_column]) < parseFloat(b[streamflow_column])) return -1;
-            if (parseFloat(a[streamflow_column]) > parseFloat(b[streamflow_column])) return 1;
+            if (parseFloat(a[sorting_column]) < parseFloat(b[sorting_column])) return -1;
+            if (parseFloat(a[sorting_column]) > parseFloat(b[sorting_column])) return 1;
             return 0;
           }
 
-          the_sorted_data = the_data.data;
-          the_sorted_data.sort(Sorter);
+          if (sorting_column != undefined && sorting_column != NaN) the_data.data.sort(Sorter);
+
 
           var column_data_max = 0.0; //if using something other than percentile (which is already 0-100), we need to figure out comparative percentage (e.g. of stage so need stage max)
           var column_data_min = 0.0;
@@ -819,9 +825,10 @@
           var logsl = new LogSlider({minval: column_data_min, maxval: column_data_max});
           var the_count = 0;
           var data_point = the_count;
+
           the_blobulator = function(){
 
-            if (get_url_params("sorting") == "percentile") {
+            if (sorting_column != undefined && sorting_column != NaN) {
               if (the_count >= the_data.data.length-1) {
                 the_count = 1;
               } else {
@@ -869,8 +876,9 @@
 
 
           }
-
-          var bubbler = setInterval(the_blobulator, 50)
+          var bubbler_speed = 50;
+          if (sorting_column != undefined && sorting_column != NaN) bubbler_speed = 1;
+          var bubbler = setInterval(the_blobulator, bubbler_speed)
         }
       });
 
