@@ -1,7 +1,7 @@
 <html>
 <head>
   <title>USGS Data Cacher</title>
-  <link rel="stylesheet" type="text/css" href="app/css/global.css">
+  <link rel="stylesheet" type="text/css" href="app/css/data-cacher.css">
   <!-- Global site tag (gtag.js) - Google Analytics -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=UA-21385959-2"></script>
   <script>
