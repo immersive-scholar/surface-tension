@@ -1,6 +1,6 @@
 <html>
 <head>
-  <title>USGS Data Cacher</title>
+  <title>Surface Tension by Caitlin & Misha</title>
   <link rel="stylesheet" type="text/css" href="app/css/data-cacher.css">
   <!-- Global site tag (gtag.js) - Google Analytics -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=UA-21385959-2"></script>
@@ -11,6 +11,11 @@
 
     gtag('config', 'UA-21385959-2');
   </script>
+  <meta property="og:url"                content="http://surface-tension.caitlinandmisha.com" />
+  <meta property="og:type"               content="artwork" />
+  <meta property="og:title"              content="Surface Tension: Reflections on Real Time Streamflow" />
+  <meta property="og:description"        content="Artistic visualization of humanity's fraught relationship with freshwater by Caitlin & Misha for the Immersive Scholar residency at NCSU." />
+  <meta property="og:image"              content="https://caitlinandmisha.com/wp-content/uploads/2019/04/Compressed-Meta-Image-for-Facebook-Surface-Tension-Temp-Feature-Image_compressed.jpg" />
 </head>
 <body>
   <?php
