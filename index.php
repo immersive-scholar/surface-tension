@@ -1,6 +1,7 @@
 <html>
 <head>
   <title>Surface Tension by Caitlin & Misha</title>
+  <link href="favicon.ico" type="image/x-icon" rel="Favicon for Surface Tension" />
   <link rel="stylesheet" type="text/css" href="app/css/data-cacher.css">
   <!-- Global site tag (gtag.js) - Google Analytics -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=UA-21385959-2"></script>
