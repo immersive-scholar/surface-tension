@@ -17,7 +17,7 @@ The size of the blobs on the map represent increases in 'percentile' of streamfl
 
 ### Data Caching
 
-Surface Tension consists of a PHP script index.php and a JavaScript-powered html page viz.html. The PHP script's role is to cache USGS streamflow data and provide it to viz.html for display. We first began working on this during the last Government Shutdown and saw warnings about a 'lapse in appropriations' on the USGS websites. This scared us into realizing that as much as data is made available, we shouldn't take it for granted (also in solidarity with [#datarescue](https://twitter.com/search?q=%23datarescue)).
+Surface Tension consists of a PHP script index.php and a JavaScript-powered html page viz.html. The PHP script's role is to cache USGS streamflow data and provide it to viz.html for display. We first began working on this during the last Government Shutdown and saw warnings about a 'lapse in appropriations' on the USGS websites. This scared us into realizing that as much as data is made available, we shouldn't take it for granted (also in solidarity with initiatives such as [DataRefuge](https://www.datarefuge.org)).
 
 The PHP script sees if data for today has been cached in app/data already. If not, it downloads the data from USGS using curl. If there is some problem, it looks in app/data for previously downloaded data instead. Once it figures out the path to the data, it redirects to the viz.html and passes the path to the data file via query string parameter. Viz.html can take other query string parameters besides 'data'. In order to create one consistent interface to the visualization, the PHP can also forward these other parameters to viz.html
 
