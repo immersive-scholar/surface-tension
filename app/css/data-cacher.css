@@ -1,11 +1,16 @@
 body {
-  background-color:       #fff;
-  font-family:            Arial, Helvetica, sans-serif, sans-serif;
+  background-color:       #04043a;
+  font-family: 'Asap', Helvetica, sans-serif;
   float:                  left;
-  font-size:              150%;
-  color:                  #7A7A7A;
+  font-size:              100%;
+  color:                  #ddd;
   line-height: 1em;
   margin: 2em;
+}
+
+img#loading {
+  width: 10px;
+  margin-right: .5em;
 }
 
 a, span.good {
@@ -14,7 +19,7 @@ a, span.good {
 }
 
 span.bad {
-  color:                  OrangeRed;
+  color:                  IndianRed;
 }
 
 p {
@@ -29,6 +34,7 @@ img {
 h1 {
   font-weight:            600;
   font-size:              1.6em;
+  margin-bottom:          2em;
 }
 
 h2 {
@@ -39,11 +45,11 @@ h2 {
 
 
 h3 {
-  font-family:            "Trebuchet MS", "Univers", sans-serif;
-  text-align:             center;
+  font-family: 'Arvo', Futura, serif;
   font-size:              .8em;
   font-weight:            600;
   font-variant:           small-caps;
+  display: inline;
 }
 
 .shadow {
