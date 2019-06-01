@@ -12,12 +12,14 @@
 
     gtag('config', 'UA-21385959-2');
   </script>
+  <!--social media preview content -->
   <meta property="og:url"                content="http://surface-tension.caitlinandmisha.com" />
   <meta property="og:type"               content="artwork" />
   <meta property="og:title"              content="Surface Tension: Reflections on Real Time Streamflow" />
   <meta property="og:description"        content="Artistic visualization of humanity's fraught relationship with freshwater by Caitlin & Misha for the Immersive Scholar residency at NCSU." />
   <meta property="og:image"              content="https://caitlinandmisha.com/wp-content/uploads/2019/04/Compressed-Meta-Image-for-Facebook-Surface-Tension-Temp-Feature-Image_compressed.jpg" />
 </head>
+
 <body>
   <?php
   //url query string parameter GET-style API options to possibly pass to the visualization
@@ -37,6 +39,7 @@
   echo "\n";
   $data_dir = '/app/data';
   $relative_data_dir = 'data'; //the fact that we need to also have this path is not ideal. If I use the data_dir path it all works locally. But on dreamhost, when this php script goes to finally load viz.html, viz.html can't find the file. If viz.html is handed a more relative path (no 'app' in relative_data_dir because viz.html is in app together with the data folder), it can indeed find it. I tried changing data_dir to just be relative and use that in javascript and below where we check for locally cached files. That broke checking for cached files. So now I guess we need two hardcoded directory path variables, one more relative for JavaScript viz.html and one less relative for index.php. Maybe index.php and app should be in the same folder.
+  $filesize_data_dir = 'app/data';//works locally, not sure why it has to be different yet again?
 
   $data_file_path = '/realtime-streamflow-'.date("Y-m-d").'.csv';//"Y-m-d-H-i-s" for real real time
 
@@ -47,7 +50,8 @@
   $tempdata = $data_dir.'/temp.csv';
   echo '<h2>Scanning for:</h2>';echo "\n";
   echo '<h3>'.$filepath.'</h3>';echo "\n";
-
+  echo '<h3>Filesize: '.filesize($filesize_data_dir.$data_file_path).'</h3>';
+  if (filesize($filesize_data_dir.$data_file_path) == 0) echo "<span class='bad'><p><b>Latest file is empty!</b></p></span>";
   //does the file for this day exist?
   //then don't redownload
   //otherwise download it but if it fails use a previous one
@@ -55,13 +59,13 @@
   //PHP requires the clearing of a cache just to see if a file exists http://php.net/manual/en/function.clearstatcache.php
   clearstatcache();
 
-  if (file_exists('.'.$filepath)) {
+  if (file_exists('.'.$filepath) && filesize($filesize_data_dir.$data_file_path) > 0) {
     echo "<h3><span class='good'>Cached data for this day was found.</span></h3>";echo "\n";
     //load visualization and pass it this file's name as a parameter;
     //*******************************************************************************************************************************************************************************
     load_viz($more_relative_filepath, $sorting, $sidebar, $zoom, $map);
   } else {
-    echo "<h3>No cached data for this day.</h3>";echo "\n";
+    echo "<h3>No cached data for this day of it's empty.</h3>";echo "\n";
     //load the file from usgs.
     //if response code is 200, cache this file and load vis with this file as parameter
     //if response is not 200, don't cache the file and load vis with a previously cached file
@@ -91,17 +95,23 @@
     // Close file handle
     fclose($fp);
 
-    echo $url;
+    echo '<h2>Downloading:</h2>';echo "\n";
+    echo '<h3>'.$url.'</h3>';echo "\n";
+
     //show only if there is something to show e.g. 404 response
     if ($http_respond != "") {
-      echo '<p><b>http_respond:</b> '.$http_respond.'</p>';echo "\n";
+      echo '<h3><b>http_respond:</b> '.$http_respond.'</h3>';echo "\n";
     }
 
     if ($http_code != "200") echo "<span class='bad'>";
-    echo '<p><b>http_code:</b> '.$http_code.'</p>';
+    echo '<h3><b>http_code (200 is best):</b> '.$http_code.'</h3>';
     if ($http_code != "200") echo "</span>";
 
-    if ($http_code == "200") {
+    $temp_file_size = filesize(dirname(__FILE__).$tempdata);
+
+    if ($temp_file_size == 0) echo "<span class='bad'><p><b>Temp file is empty!</b></p></span>";
+
+    if ($http_code == "200" && $temp_file_size > 0) {
       if (!copy(dirname(__FILE__).$tempdata, dirname(__FILE__).$filepath)){
         echo "<p><span class='bad'>ERROR copying temp file into new cached file!</span></p>";
       } else {
@@ -111,7 +121,7 @@
       }
     } else {
       //Can't load data, use previously cached file
-      echo '<p>Find Last Cached File</p>';
+      echo '<p>Find last, non-empty cached file</p>';
       echo "<ul>";
       $last_cached_file = scan_dir(dirname(__FILE__).$data_dir);
       echo $last_cached_file;
@@ -129,6 +139,7 @@
     $files = array();
     foreach (scandir($dir) as $file) {
       if (in_array($file, $ignored)) continue;
+      if (filesize($file) == 0) continue;
       if (strpos($file, 'streamflow') !== false) {
         $files[$file] = filemtime($dir . '/' . $file);
       }
