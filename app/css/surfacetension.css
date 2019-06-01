@@ -30,6 +30,7 @@ body {
   padding: 3em;
   height: 100%;
   background-image: url("../img/meta-background.jpg");
+  display: none;
 }
 
 #meta a, a:link, a:visited {

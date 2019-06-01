@@ -947,7 +947,19 @@
           <li><a href="https://www.usgs.gov/" title="USGS">usgs.gov</a></li>
         </ul>
 
+    <script>
+    if (get_url_params("sidebar")!=undefined && get_url_params("sidebar")!="") {
+      //sideboar with text to show meta info
+      var sidebarsize = parseFloat(get_url_params("sidebar"));
+      if (sidebarsize <= 0 || sidebarsize >= 100) {
+        console.error("Sidebar width must be above 0 and below 100 (percent)");
+        //sidebar is too small or too big
+      } else {
+        document.getElementById("meta").style.display = "block";
+      }
 
+    }
+    </script>
 
 
       </div>
