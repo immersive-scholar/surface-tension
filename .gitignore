@@ -66,3 +66,10 @@ typings/
 
 # next.js build output
 .next
+
+# vagrant
+.vagrant
+
+# non-local ansible roles
+ansible/roles/*
+!ansible/roles/surface-tension
