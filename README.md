@@ -15,6 +15,24 @@ We created Surface Tension during an Immersive Scholar Residency at NC State whi
 
 The size of the blobs on the map represent increases in 'percentile' of streamflow at each of the ~11K sites, each site comparing only to itself, for the entire period of record. To find out more about the chosen colors and other aspects of the visuals, check out the about page [caitlinandmisha.com/surface-tension](http://caitlinandmisha.com/surface-tension).
 
+### Try it out
+
+Install [VirtualBox](https://www.virtualbox.org/) and [Vagrant](https://www.vagrantup.com)
+
+Clone the repository
+
+    git clone git@github.com:immersive-scholar/surface-tension
+
+Enter the surface-tension directory
+
+    cd surface-tension
+
+Build the environment
+
+    vagrant up
+
+Visit http://localhost:8080
+
 ### Data Caching
 
 Surface Tension consists of a PHP script index.php and a JavaScript-powered html page viz.html. The PHP script's role is to cache USGS streamflow data and provide it to viz.html for display. We first began working on this during the last Government Shutdown and saw warnings about a 'lapse in appropriations' on the USGS websites. This scared us into realizing that as much as data is made available, we shouldn't take it for granted (also in solidarity with initiatives such as [DataRefuge](https://www.datarefuge.org)).
