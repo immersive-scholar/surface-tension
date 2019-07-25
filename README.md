@@ -17,21 +17,54 @@ The size of the blobs on the map represent increases in 'percentile' of streamfl
 
 ### Try it out
 
-Install [VirtualBox](https://www.virtualbox.org/) and [Vagrant](https://www.vagrantup.com)
+There are two methods for running Surface Tension on a local machine: 1) using a local PHP server or 2) using VirtualBox and Vagrant to run a packaged version in a virtual environment. If you already have PHP installed we recomend using the local PHP server method. If not, we recomend using VirtualBox and Vagrant.
+
+#### Run using local PHP server
+
+Install [PHP](https://www.php.net/downloads.php). In a terminal application do the following:
 
 Clone the repository
-
-    git clone git@github.com:immersive-scholar/surface-tension
+```
+git clone git@github.com:immersive-scholar/surface-tension
+```
 
 Enter the surface-tension directory
+```
+cd surface-tension
+```
 
-    cd surface-tension
+Start a local PHP server
+```
+php -S localhost:8080
+```
+
+Visit http://localhost:8080 in a browser to view the live project.
+
+#### Run using VirtualBox and Vagrant
+
+Install [VirtualBox](https://www.virtualbox.org/) and [Vagrant](https://www.vagrantup.com). In a terminal application do the following:
+
+Clone the repository
+```
+git clone git@github.com:immersive-scholar/surface-tension
+```
+
+Enter the surface-tension directory
+```
+cd surface-tension
+```
 
 Build the environment
+```
+vagrant up
+```
 
-    vagrant up
+_If you receive a message when running `vagrant up` indicating "Plugin vagrant-sshfs is not installed", install it by running:_
+```
+vagrant plugin install vagrant-sshfs
+```
 
-Visit http://localhost:8080
+Once the environment is built, visit http://localhost:8080 in a browser to view the live project.
 
 ### Data Caching
 
