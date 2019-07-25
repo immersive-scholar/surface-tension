@@ -15,9 +15,9 @@ We created Surface Tension during an Immersive Scholar Residency at NC State whi
 
 The size of the blobs on the map represent increases in 'percentile' of streamflow at each of the ~11K sites, each site comparing only to itself, for the entire period of record. To find out more about the chosen colors and other aspects of the visuals, check out the about page [caitlinandmisha.com/surface-tension](http://caitlinandmisha.com/surface-tension).
 
-### Try it out
+### Installation Instructions
 
-There are two methods for running Surface Tension on a local machine: 1) using a local PHP server or 2) using VirtualBox and Vagrant to run a packaged version in a virtual environment. If you already have PHP installed we recomend using the local PHP server method. If not, we recomend using VirtualBox and Vagrant.
+There are two methods for running Surface Tension on a local machine: 1) using a local PHP server or 2) using VirtualBox and Vagrant to run a packaged version in a virtual environment. If you already have PHP installed we recommend using the local PHP server method. If not, we recommend using VirtualBox and Vagrant.
 
 #### Run using local PHP server
 
