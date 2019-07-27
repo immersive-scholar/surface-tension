@@ -79,26 +79,26 @@ sidebar in percent, (default 0), e.g.
 `
 http://surface-tension.caitlinandmisha.com?sidebar=22
 `
-
+<br/><br/>
 
 ![Image of Surface Tension with Sorting](https://caitlinandmisha.com/wp-content/uploads/2019/07/Surface-Tension-Screenshot-Sort-by-Caitlin-and-Misha.png)
 sorting using allowed USGS data columns (site_no, dec_lat_va, dec_long_va, huc_cd, flow, stage, class, percentile, percent_median, percent_mean), e.g.
 `
 http://surface-tension.caitlinandmisha.com?sidebar=22&sorting=dec_long_va
 `
+<br/><br/>
 
-
-zoom (default 0.8 based on our chosen D3 projection scaling), e.g.
+zoom *not pictured* (default 0.8 based on our chosen D3 projection scaling), e.g.
 `http://surface-tension.caitlinandmisha.com?sidebar=22&sorting=dec_long_va&zoom=1
 `
-
+<br/><br/>
 
 ![Image of Surface Tension with Sorting](https://caitlinandmisha.com/wp-content/uploads/2019/07/Surface-Tension-Variant-Screenshot-by-Caitlin-and-Misha.png)
 map can be set to false to show Surface Tension (variant), e.g.
 `
 http://surface-tension.caitlinandmisha.com?sidebar=22&sorting=dec_long_va&zoom=1&map=false
 `
-
+<br/><br/>
 
 To monitor performance, a graph of frames per second (FPS) can be shown by hitting 's' on the keyboard, or passing in stats=on for the JavaScript viz.html only (not PHP). For example:
 `
