@@ -95,7 +95,7 @@ http://surface-tension.caitlinandmisha.com?sidebar=22&sorting=dec_long_va&zoom=1
 
 To monitor performance, a graph of frames per second (FPS) can be shown by hitting 's' on the keyboard, or passing in stats=on for the JavaScript viz.html only (not PHP). For example:
 `
-http://surface-tension.caitlinandmisha.com/app/viz.html?data=data/realtime-streamflow-2019-04-11.csv&map=false&stats=on
+http://surface-tension.caitlinandmisha.com/app/viz.html?data=data/realtime-streamflow-2019-05-03.csv&map=false&stats=on
 `
 
 ### Future plans
