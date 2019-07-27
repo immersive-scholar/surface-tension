@@ -74,24 +74,34 @@ The PHP script sees if data for today has been cached in app/data already. If no
 
 ### Options
 
+![Image of Surface Tension with Sidebar](https://caitlinandmisha.com/wp-content/uploads/2019/07/Surface-Tension-Screenshot-Sidebar-by-Caitlin-and-Misha.png)
+
 sidebar in percent, (default 0), e.g.
 `
 http://surface-tension.caitlinandmisha.com?sidebar=22
 `
+
+
+![Image of Surface Tension with Sorting](https://caitlinandmisha.com/wp-content/uploads/2019/07/Surface-Tension-Screenshot-Sort-by-Caitlin-and-Misha.png)
 
 sorting using allowed USGS data columns (site_no, dec_lat_va, dec_long_va, huc_cd, flow, stage, class, percentile, percent_median, percent_mean), e.g.
 `
 http://surface-tension.caitlinandmisha.com?sidebar=22&sorting=dec_long_va
 `
 
+
 zoom (default 0.8 based on our chosen D3 projection scaling), e.g.
 `http://surface-tension.caitlinandmisha.com?sidebar=22&sorting=dec_long_va&zoom=1
 `
+
+
+![Image of Surface Tension with Sorting](https://caitlinandmisha.com/wp-content/uploads/2019/07/Surface-Tension-Variant-Screenshot-by-Caitlin-and-Misha.png)
 
 map can be set to false to show Surface Tension (variant), e.g.
 `
 http://surface-tension.caitlinandmisha.com?sidebar=22&sorting=dec_long_va&zoom=1&map=false
 `
+
 
 To monitor performance, a graph of frames per second (FPS) can be shown by hitting 's' on the keyboard, or passing in stats=on for the JavaScript viz.html only (not PHP). For example:
 `
