@@ -6,15 +6,14 @@
   <style>
     @import url('https://fonts.googleapis.com/css?family=Arvo|Asap');
   </style>
-  <!-- Global site tag (gtag.js) - Google Analytics -->
-
-  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-21385959-2"></script>
+  <!-- Global Site Tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-17138302-21"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
+    function gtag(){dataLayer.push(arguments)};
     gtag('js', new Date());
 
-    gtag('config', 'UA-21385959-2');
+    gtag('config', 'UA-17138302-21');
   </script>
   <!--social media preview content -->
   <meta property="og:url"                content="http://surface-tension.caitlinandmisha.com" />
