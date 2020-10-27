@@ -1,12 +1,12 @@
 # Surface Tension
 
-**Artistic visualization of humanity's fraught relationship with freshwater by Caitlin &amp; Misha for the Immersive Scholar residency at the NC State Univeristy Libraries**
+## Artistic visualization of humanity's fraught relationship with freshwater by Caitlin &amp; Misha for the Immersive Scholar residency at the NC State Univeristy Libraries**
 
 ![Image of Surface Tension](https://caitlinandmisha.com/wp-content/uploads/2019/04/Surface-Tension-screenshot.jpg)
 
 **This visualization maps streamflow data from the United States Geological Survey in real time across the US. Water supports life but can also drown and destroy. People are mostly water, but the melting ice caps threaten our very existence. Harnessing this elemental force requires a balancing act and this artwork is a reflection on humanity's fraught relationship with freshwater.**
 
-#### Special thanks to NC State Libraries, the [Immersive Scholar Residency](https://immersivescholar.org), the Andrew W. Mellon Foundation, and the Raleigh [USGS](https://www.usgs.gov/).
+**Special thanks to NC State Libraries, the [Immersive Scholar Residency](https://immersivescholar.org), the Andrew W. Mellon Foundation, and the Raleigh [USGS](https://www.usgs.gov/).**
 
 See it live here [surface-tension.caitlinandmisha.com](http://surface-tension.caitlinandmisha.com) or visit the about page [caitlinandmisha.com/surface-tension](http://caitlinandmisha.com/surface-tension)
 
@@ -57,7 +57,7 @@ Start a local PHP server
 php -S localhost:8080
 ```
 
-Visit http://localhost:8080 in a browser to view the live project.
+Visit <http://localhost:8080> in a browser to view the live project.
 
 ### Run using VirtualBox and Vagrant
 
@@ -87,7 +87,7 @@ _If you receive a message when running `vagrant up` indicating "Plugin vagrant-s
 vagrant plugin install vagrant-sshfs
 ```
 
-Once the environment is built, visit http://localhost:8080 in a browser to view the live project.
+Once the environment is built, visit <http://localhost:8080> in a browser to view the live project.
 
 ### Data Caching
 
