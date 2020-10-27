@@ -29,7 +29,7 @@ The size of the blobs on the map represent increases in 'percentile' of streamfl
 ## Software dependencies
 
 1. A modern browser is required to run the remotely hosted version.
-1. See [Installation Instructions](## Installation-Instructions) for dependencies based on installation method when running locally.
+1. See [Installation Instructions](##-Installation-Instructions) for dependencies based on installation method when running locally.
 
 ## Installation Instructions
 
