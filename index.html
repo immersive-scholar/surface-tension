@@ -1,0 +1,991 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Surface Tension by Caitlin & Misha</title>
+  <link href="../favicon.ico" type="image/x-icon" rel="Favicon for Surface Tension" />
+  <!--
+    Surface Tension
+    by Caitlin & Misha
+
+    Special thanks to NC State Libraries, the Immersive Scholar Residency, the Andrew W. Mellon Foundation and the USGS Raleigh.
+
+    Built using data from the USGS, code from three.js, especially the gpgu water and the bump mapping examples, D3 mapping code and examples, public domain photos, etc.
+  -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+  <link rel="stylesheet" type="text/css" href="css/surfacetension.css">
+
+  <style>
+    @import url('https://fonts.googleapis.com/css?family=Arvo|Asap');
+  </style>
+
+  <script src="lib/d3.v3.min.js"></script>
+
+  <script src="lib/papaparse.js"></script>
+
+  <script src="lib/logarithmic_scaler.js"></script>
+
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-21385959-2"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-21385959-2');
+  </script>
+
+
+</head>
+<body>
+  <div id="loader" class="center-on-screen">
+    <h2 class="loader-text">Loading Streamflow Data</h2>
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="#e0ffff" stroke="#e0ffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-loader spinner"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line><line x1="2" y1="12" x2="6" y2="12"></line><line x1="18" y1="12" x2="22" y2="12"></line><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line></svg>
+  </div>
+  <script src="lib/three.min.js"></script>
+  <script src="js/WebGL.js"></script>
+  <script src="js/libs/stats.min.js"></script>
+  <script src="js/controls/OrbitControls.js"></script>
+  <script src="js/SimplexNoise.js"></script>
+
+  <script src="js/GPUComputationRenderer.js"></script>
+
+
+  <!-- This is the 'compute shader' for the water heightmap: -->
+  <script id="heightmapFragmentShader" type="x-shader/x-fragment">
+
+  #include <common>
+
+  uniform vec2 mousePos;
+  uniform float mouseSize;
+  uniform float viscosityConstant;
+  uniform float heightCompensation;
+
+  void main()	{
+
+    vec2 cellSize = 1.0 / resolution.xy;
+
+    vec2 uv = gl_FragCoord.xy * cellSize;
+
+    // heightmapValue.x == height from previous frame
+    // heightmapValue.y == height from penultimate frame
+    // heightmapValue.z, heightmapValue.w not used
+    vec4 heightmapValue = texture2D( heightmap, uv );
+
+    // Get neighbours
+    vec4 north = texture2D( heightmap, uv + vec2( 0.0, cellSize.y ) );
+    vec4 south = texture2D( heightmap, uv + vec2( 0.0, - cellSize.y ) );
+    vec4 east = texture2D( heightmap, uv + vec2( cellSize.x, 0.0 ) );
+    vec4 west = texture2D( heightmap, uv + vec2( - cellSize.x, 0.0 ) );
+
+    // https://web.archive.org/web/20080618181901/http://freespace.virgin.net/hugo.elias/graphics/x_water.htm
+
+    float newHeight = ( ( north.x + south.x + east.x + west.x ) * 0.5 - heightmapValue.y ) * viscosityConstant;
+
+    // Mouse influence
+    float mousePhase = clamp( length( ( uv - vec2( 0.5 ) ) * BOUNDS - vec2( mousePos.x, - mousePos.y ) ) * PI / mouseSize, 0.0, PI );
+    newHeight += ( cos( mousePhase ) + 1.0 ) * 0.28;
+
+    heightmapValue.y = heightmapValue.x;
+    heightmapValue.x = newHeight;
+
+    gl_FragColor = heightmapValue;
+
+  }
+
+  </script>
+
+  <!-- This is just a smoothing 'compute shader' for using manually: -->
+  <script id="smoothFragmentShader" type="x-shader/x-fragment">
+
+  uniform sampler2D texture;
+
+  void main()	{
+
+    vec2 cellSize = 1.0 / resolution.xy;
+
+    vec2 uv = gl_FragCoord.xy * cellSize;
+
+    // Computes the mean of texel and 4 neighbours
+    vec4 textureValue = texture2D( texture, uv );
+    textureValue += texture2D( texture, uv + vec2( 0.0, cellSize.y ) );
+    textureValue += texture2D( texture, uv + vec2( 0.0, - cellSize.y ) );
+    textureValue += texture2D( texture, uv + vec2( cellSize.x, 0.0 ) );
+    textureValue += texture2D( texture, uv + vec2( - cellSize.x, 0.0 ) );
+
+    textureValue /= 5.0;
+
+    gl_FragColor = textureValue;
+
+  }
+
+  </script>
+
+  <!-- This is a 'compute shader' to read the current level and normal of water at a point -->
+  <!-- It is used with a variable of size 1x1 -->
+  <script id="readWaterLevelFragmentShader" type="x-shader/x-fragment">
+
+  uniform vec2 point1;
+
+  uniform sampler2D texture;
+
+  // Integer to float conversion from https://stackoverflow.com/questions/17981163/webgl-read-pixels-from-floating-point-render-target
+
+  float shift_right( float v, float amt ) {
+
+    v = floor( v ) + 0.5;
+    return floor( v / exp2( amt ) );
+
+  }
+
+  float shift_left( float v, float amt ) {
+
+    return floor( v * exp2( amt ) + 0.5 );
+
+  }
+
+  float mask_last( float v, float bits ) {
+
+    return mod( v, shift_left( 1.0, bits ) );
+
+  }
+
+  float extract_bits( float num, float from, float to ) {
+
+    from = floor( from + 0.5 ); to = floor( to + 0.5 );
+    return mask_last( shift_right( num, from ), to - from );
+
+  }
+
+  vec4 encode_float( float val ) {
+    if ( val == 0.0 ) return vec4( 0, 0, 0, 0 );
+    float sign = val > 0.0 ? 0.0 : 1.0;
+    val = abs( val );
+    float exponent = floor( log2( val ) );
+    float biased_exponent = exponent + 127.0;
+    float fraction = ( ( val / exp2( exponent ) ) - 1.0 ) * 8388608.0;
+    float t = biased_exponent / 2.0;
+    float last_bit_of_biased_exponent = fract( t ) * 2.0;
+    float remaining_bits_of_biased_exponent = floor( t );
+    float byte4 = extract_bits( fraction, 0.0, 8.0 ) / 255.0;
+    float byte3 = extract_bits( fraction, 8.0, 16.0 ) / 255.0;
+    float byte2 = ( last_bit_of_biased_exponent * 128.0 + extract_bits( fraction, 16.0, 23.0 ) ) / 255.0;
+    float byte1 = ( sign * 128.0 + remaining_bits_of_biased_exponent ) / 255.0;
+    return vec4( byte4, byte3, byte2, byte1 );
+  }
+
+  void main()	{
+
+    vec2 cellSize = 1.0 / resolution.xy;
+
+    float waterLevel = texture2D( texture, point1 ).x;
+
+    vec2 normal = vec2(
+      ( texture2D( texture, point1 + vec2( - cellSize.x, 0 ) ).x - texture2D( texture, point1 + vec2( cellSize.x, 0 ) ).x ) * WIDTH / BOUNDS,
+      ( texture2D( texture, point1 + vec2( 0, - cellSize.y ) ).x - texture2D( texture, point1 + vec2( 0, cellSize.y ) ).x ) * WIDTH / BOUNDS );
+
+      if ( gl_FragCoord.x < 1.5 ) {
+
+        gl_FragColor = encode_float( waterLevel );
+
+      } else if ( gl_FragCoord.x < 2.5 ) {
+
+        gl_FragColor = encode_float( normal.x );
+
+      } else if ( gl_FragCoord.x < 3.5 ) {
+
+        gl_FragColor = encode_float( normal.y );
+
+      } else {
+
+        gl_FragColor = encode_float( 0.0 );
+
+      }
+
+    }
+
+    </script>
+
+    <!-- This is the water visualization shader, copied from the MeshPhongMaterial and modified: -->
+    <script id="waterVertexShader" type="x-shader/x-vertex">
+
+    uniform sampler2D heightmap;
+
+    #define PHONG
+
+    varying vec3 vViewPosition;
+
+    #ifndef FLAT_SHADED
+
+    varying vec3 vNormal;
+
+    #endif
+
+    #include <common>
+    #include <uv_pars_vertex>
+    #include <uv2_pars_vertex>
+    #include <displacementmap_pars_vertex>
+    #include <envmap_pars_vertex>
+    #include <color_pars_vertex>
+    #include <morphtarget_pars_vertex>
+    #include <skinning_pars_vertex>
+    #include <shadowmap_pars_vertex>
+    #include <logdepthbuf_pars_vertex>
+    #include <clipping_planes_pars_vertex>
+
+    void main() {
+
+      vec2 cellSize = vec2( 1.0 / WIDTH, 1.0 / WIDTH );
+
+      #include <uv_vertex>
+      #include <uv2_vertex>
+      #include <color_vertex>
+
+      // # include <beginnormal_vertex>
+      // Compute normal from heightmap
+      vec3 objectNormal = vec3(
+        ( texture2D( heightmap, uv + vec2( - cellSize.x, 0 ) ).x - texture2D( heightmap, uv + vec2( cellSize.x, 0 ) ).x ) * WIDTH / BOUNDS,
+        ( texture2D( heightmap, uv + vec2( 0, - cellSize.y ) ).x - texture2D( heightmap, uv + vec2( 0, cellSize.y ) ).x ) * WIDTH / BOUNDS,
+        1.0 );
+        //<beginnormal_vertex>
+
+        #include <morphnormal_vertex>
+        #include <skinbase_vertex>
+        #include <skinnormal_vertex>
+        #include <defaultnormal_vertex>
+
+        #ifndef FLAT_SHADED // Normal computed with derivatives when FLAT_SHADED
+
+        vNormal = normalize( transformedNormal );
+
+        #endif
+
+        //# include <begin_vertex>
+        float heightValue = texture2D( heightmap, uv ).x;
+        vec3 transformed = vec3( position.x, position.y, heightValue );
+        //<begin_vertex>
+
+        #include <morphtarget_vertex>
+        #include <skinning_vertex>
+        #include <displacementmap_vertex>
+        #include <project_vertex>
+        #include <logdepthbuf_vertex>
+        #include <clipping_planes_vertex>
+
+        vViewPosition = - mvPosition.xyz;
+
+        #include <worldpos_vertex>
+        #include <envmap_vertex>
+        #include <shadowmap_vertex>
+
+      }
+
+      </script>
+
+      <script>
+
+      var move_point;
+      var ValuesChanger;
+      var viz_scaler = 1;
+      var dist = 200;
+      var d3_scaler = 800; //scale projection to produce the right borders around country for making texture image with wide borders (so ocean can be shown on the sides of the continent on a really wide aspect ratios)
+      var d3_default_scaler = 1000; //not sure why d3 has default scaling value at 1000?
+
+
+      //https://stackoverflow.com/questions/831030/how-to-get-get-request-parameters-in-javascript
+      function get_url_params(name){
+        if(name=(new RegExp('[?&]'+encodeURIComponent(name)+'=([^&]*)')).exec(location.search)) {
+          return decodeURIComponent(name[1]);
+        }
+
+      }
+
+
+      if ( WEBGL.isWebGLAvailable() === false ) {
+
+        document.body.appendChild( WEBGL.getWebGLErrorMessage() );
+
+      }
+
+      var hash = document.location.hash.substr( 1 );
+      if ( hash ) hash = parseInt( hash, 0 );
+
+      // Texture width for simulation
+      var WIDTH = hash || 512;
+
+      // Water size in system units
+      var BOUNDS = 512;
+      var BOUNDS_HALF = BOUNDS * 0.5;
+
+      var container, stats;
+      var camera, scene, renderer;
+      var mouseMoved = false;
+      var mouseCoords = new THREE.Vector2();
+      var raycaster = new THREE.Raycaster();
+
+      var waterMesh;
+      var meshRay;
+      var gpuCompute;
+      var heightmapVariable;
+      var waterUniforms;
+      var smoothShader;
+      var readWaterLevelShader;
+      var readWaterLevelRenderTarget;
+      var readWaterLevelImage;
+      var waterNormal = new THREE.Vector3();
+
+      var simplex = new SimplexNoise();
+
+
+      function change( n ) {
+
+        location.hash = n;
+        location.reload();
+        return false;
+
+      }
+
+
+      init();
+      animate();
+
+      function calculateFov() {
+        if (get_url_params("sidebar")!=undefined && get_url_params("sidebar")!="") {
+          //sideboar with text to show meta info
+          var sidebarsize = parseFloat(get_url_params("sidebar"));
+          if (sidebarsize <= 0 || sidebarsize >= 100) {
+            console.error("Sidebar width must be above 0 and below 100 (percent)");
+            //sidebar is too small or too big
+          } else {
+            var main_size = 100 - sidebarsize;
+            viz_scaler = window.innerWidth * main_size / 100.0 /window.innerWidth;
+
+          }
+
+        }
+
+        var zoom_margin = 20; //20 this is to make sure sides of the webgl canvas are not visible when they get exposed by blobulation
+        // Calculate the camera distance https://stackoverflow.com/questions/14614252/how-to-fit-camera-to-object
+
+
+        var the_zoom = d3_scaler / d3_default_scaler; //default zoom based on D3 projection settings
+
+        var requested_zoom = get_url_params("zoom");
+        if (requested_zoom!=undefined && requested_zoom!="" && requested_zoom >= 0 && requested_zoom <= 3) the_zoom = parseFloat(requested_zoom);
+
+        var hheight = (BOUNDS - zoom_margin)*the_zoom; //To tune the display, a unique zoom parameter can now be requested by url parameter (via the data cacher php app or manually)
+        var wwidth = (BOUNDS - zoom_margin)*the_zoom;
+
+
+        if (window.innerWidth * viz_scaler >= window.innerHeight) {
+          var fov = 2 * Math.atan( ( wwidth / (window.innerWidth * viz_scaler  / window.innerHeight) ) / ( 2 * dist ) ) * ( 180 / Math.PI ); // in degrees, matching bounding box by width
+        } else {
+          fov = 2 * Math.atan( hheight / ( 2 * dist ) ) * ( 180 / Math.PI ); //by height
+        }
+
+        return fov;
+      }
+
+      function init() {
+
+        container = document.createElement( 'div' );
+        container.setAttribute("id", "SurfaceTension");
+        document.body.appendChild( container );
+
+        var dist = 200;
+        var fov = calculateFov(dist);
+        camera = new THREE.PerspectiveCamera( fov, window.innerWidth * viz_scaler / window.innerHeight, 1, 3000 );
+        camera.position.set( 0, dist, 0 );
+
+        scene = new THREE.Scene();
+
+        var sun = new THREE.DirectionalLight( 0x7AFF0A, 1 );
+        sun.position.set( 300, 400, 175 );
+        scene.add( sun );
+
+        var sun2 = new THREE.DirectionalLight( 0xFFFFFF, 1.3 );
+        sun2.position.set( - 100, 350, - 200 );
+        scene.add( sun2 );
+
+        renderer = new THREE.WebGLRenderer();
+        renderer.setPixelRatio( window.devicePixelRatio );
+        renderer.setSize( window.innerWidth, window.innerHeight );
+        container.appendChild( renderer.domElement );
+
+        var controls = new THREE.OrbitControls( camera, renderer.domElement );
+        controls.enabled = false;
+
+        stats = new Stats();
+        if (get_url_params("stats")=="on") container.appendChild( stats.dom ); //STATS TURNED OFF, will control with query string API
+
+
+        document.addEventListener( 'keydown', function ( event ) {
+          // S Pressed: Toggle stats
+          if ( event.keyCode === 83 ) {
+            if (!container.contains(stats.dom)) { container.appendChild( stats.dom ); } else { container.removeChild(stats.dom) }
+          }
+        }, false );
+
+        window.addEventListener( 'resize', onWindowResize, false );
+
+        var effectController = {
+          mouseSize: 20.0,
+          viscosity: 0.99 //.999 is max
+        };
+
+        valuesChanger = function (dataMouseSize) {
+
+          dataMouseSize = dataMouseSize || effectController.mouseSize;
+
+          heightmapVariable.material.uniforms[ "mouseSize" ].value = dataMouseSize;
+          heightmapVariable.material.uniforms[ "viscosityConstant" ].value = effectController.viscosity;
+
+        };
+
+        initWater();
+
+        valuesChanger();
+
+        //this is needed if there is a sidebar and the window is resized
+        document.getElementById("SurfaceTension").style.width = String(viz_scaler * 100.0)+"%";
+        document.getElementById("SurfaceTension").childNodes.item("canvas").style.width = "100%";
+      }
+
+
+      function initWater() {
+
+        var geometry = new THREE.PlaneBufferGeometry( BOUNDS, BOUNDS, WIDTH - 1, WIDTH - 1 );
+
+        // material: make a ShaderMaterial clone of MeshPhongMaterial, with customized vertex shader
+        var material = new THREE.ShaderMaterial( {
+          uniforms: THREE.UniformsUtils.merge( [
+            THREE.ShaderLib[ 'phong' ].uniforms,
+            {
+              "heightmap": { value: null }
+            }
+          ] ),
+          vertexShader: document.getElementById( 'waterVertexShader' ).textContent,
+          fragmentShader: THREE.ShaderChunk[ 'meshphong_frag' ]
+
+        } );
+
+        material.lights = true;
+        var textureLoader = new THREE.TextureLoader();
+
+
+        // Material attributes from MeshPhongMaterial, correlates to 'diffuse' in uniforms settings
+        material.color = new THREE.Color( 0xEBC4FF);
+
+        //Original texture is from the public domain: httpwww.photos-public-domain.com20110929skin
+        if (get_url_params("map") != undefined && get_url_params("map") != "" && get_url_params("map")=="false") {
+          var skin_texture = textureLoader.load( "img/textures/skin/No-Map-Texture.jpg" );
+          //Bump map
+          var mapHeight = textureLoader.load( "img/textures/skin/No-Map-Bump-Map.jpg" );
+          //Specular
+          var mapSpecular = textureLoader.load( "" );
+          //Emissive
+          var mapEmissive = textureLoader.load( "" );
+
+        } else {
+
+          var skin_texture = textureLoader.load( "img/textures/skin/Skin_Map_greyblue_greenshadow_3_20_2019.jpg",
+            function(texture){
+
+              material.specular = new THREE.Color( 0x660B14);
+              material.uniforms[ "specular" ].value = material.specular;
+
+              material.emissive = new THREE.Color( 0x5E0D00);
+              material.uniforms["emissive"].value = material.emissive;
+            },
+            undefined,
+            function(err) {
+              console.error("Can't load skin texture")
+            } );
+
+          //Bump map
+          var mapHeight = textureLoader.load( "img/textures/skin/Skin_Map_greyscale_greenshadow4_04_2019.jpg" );
+          //Specular
+          var mapSpecular = textureLoader.load( "img/textures/skin/Skin_Map_Rivers6.jpg" );
+          //Emissive
+          var mapEmissive = textureLoader.load( "img/textures/skin/Skin_Map_Rivers8.jpg" );
+
+        }
+        material.map = skin_texture;
+
+        mapSpecular.anisotropy = 4;
+        mapSpecular.wrapS = mapSpecular.wrapT = THREE.RepeatWrapping;
+        mapSpecular.format = THREE.RGBFormat;
+        material.specular = new THREE.Color( 0x000000);
+        material.shininess = 7;
+        material.specularMap = mapSpecular;
+
+        //Emissive settings
+
+        material.emissive = new THREE.Color( 0x000000);
+        material.emissiveMap = mapEmissive;
+
+        //Bump map settings
+        mapHeight.anisotropy = 4;
+        mapHeight.wrapS = mapHeight.wrapT = THREE.RepeatWrapping;
+        mapHeight.format = THREE.RGBFormat;
+        material.bumpMap = mapHeight;
+
+        material.transparent = false;
+
+
+        // Sets the uniforms with the material values
+        material.uniforms[ "diffuse" ].value = material.color;
+
+        material.uniforms[ "shininess" ].value = Math.max( material.shininess, 1e-4 );
+        material.uniforms[ "specular" ].value = material.specular;
+        material.uniforms["specularMap"].value = material.specularMap;
+
+
+        material.uniforms["emissive"].value = material.emissive;
+        material.uniforms["emissiveMap"].value = material.emissiveMap;
+
+
+        material.uniforms[ "map" ].value = material.map;
+
+        material.uniforms[ "bumpMap" ].value = material.bumpMap;
+
+
+        // Defines
+        material.defines.WIDTH = WIDTH.toFixed( 1 );
+        material.defines.BOUNDS = BOUNDS.toFixed( 1 );
+
+        waterUniforms = material.uniforms;
+
+        waterMesh = new THREE.Mesh( geometry, material );
+        waterMesh.rotation.x = - Math.PI / 2;
+        waterMesh.matrixAutoUpdate = false;
+        waterMesh.updateMatrix();
+
+        scene.add( waterMesh );
+
+        // Mesh just for mouse raycasting
+        var geometryRay = new THREE.PlaneBufferGeometry( BOUNDS, BOUNDS, 1, 1 );
+        meshRay = new THREE.Mesh( geometryRay, new THREE.MeshBasicMaterial( { color: 0xFFFFFF, visible: false } ) );
+        meshRay.rotation.x = - Math.PI / 2;
+        meshRay.matrixAutoUpdate = false;
+        meshRay.updateMatrix();
+        scene.add( meshRay );
+
+
+        // Creates the gpu computation class and sets it up
+
+        gpuCompute = new GPUComputationRenderer( WIDTH, WIDTH, renderer );
+
+        var heightmap0 = gpuCompute.createTexture();
+
+        fillTexture( heightmap0 );
+
+        heightmapVariable = gpuCompute.addVariable( "heightmap", document.getElementById( 'heightmapFragmentShader' ).textContent, heightmap0 );
+
+        gpuCompute.setVariableDependencies( heightmapVariable, [ heightmapVariable ] );
+
+        heightmapVariable.material.uniforms[ "mousePos" ] = { value: new THREE.Vector2( 10000, 10000 ) };
+        heightmapVariable.material.uniforms[ "mouseSize" ] = { value: 20.0 };
+        heightmapVariable.material.uniforms[ "viscosityConstant" ] = { value: 0.98 };
+        heightmapVariable.material.uniforms[ "heightCompensation" ] = { value: 0 };
+        heightmapVariable.material.defines.BOUNDS = BOUNDS.toFixed( 1 );
+
+        var error = gpuCompute.init();
+        if ( error !== null ) {
+          console.error( error );
+        }
+
+        // Create compute shader to smooth the water surface and velocity
+        smoothShader = gpuCompute.createShaderMaterial( document.getElementById( 'smoothFragmentShader' ).textContent, { texture: { value: null } } );
+
+        // Create compute shader to read water level
+        readWaterLevelShader = gpuCompute.createShaderMaterial( document.getElementById( 'readWaterLevelFragmentShader' ).textContent, {
+          point1: { value: new THREE.Vector2() },
+          texture: { value: null }
+        } );
+        readWaterLevelShader.defines.WIDTH = WIDTH.toFixed( 1 );
+        readWaterLevelShader.defines.BOUNDS = BOUNDS.toFixed( 1 );
+
+        // Create a 4x1 pixel image and a render target (Uint8, 4 channels, 1 byte per channel) to read water height and orientation
+        readWaterLevelImage = new Uint8Array( 4 * 1 * 4 );
+
+        readWaterLevelRenderTarget = new THREE.WebGLRenderTarget( 4, 1, {
+          wrapS: THREE.ClampToEdgeWrapping,
+          wrapT: THREE.ClampToEdgeWrapping,
+          minFilter: THREE.NearestFilter,
+          magFilter: THREE.NearestFilter,
+          format: THREE.RGBAFormat,
+          type: THREE.UnsignedByteType,
+          stencilBuffer: false,
+          depthBuffer: false
+        } );
+
+      }
+
+      function fillTexture( texture ) {
+
+        var waterMaxHeight = 10;
+
+        function noise( x, y ) {
+
+          var multR = waterMaxHeight;
+          var mult = 0.025;
+          var r = 0;
+          for ( var i = 0; i < 15; i ++ ) {
+
+            r += multR * simplex.noise( x * mult, y * mult );
+            multR *= 0.53 + 0.025 * i;
+            mult *= 1.25;
+
+          }
+          return r;
+
+        }
+
+        var pixels = texture.image.data;
+
+        var p = 0;
+        for ( var j = 0; j < WIDTH; j ++ ) {
+
+          for ( var i = 0; i < WIDTH; i ++ ) {
+
+            var x = i * 128 / WIDTH;
+            var y = j * 128 / WIDTH;
+
+            pixels[ p + 0 ] = noise( x, y, 123.4 );
+            pixels[ p + 1 ] = pixels[ p + 0 ];
+            pixels[ p + 2 ] = 0;
+            pixels[ p + 3 ] = 1;
+
+            p += 4;
+
+          }
+
+        }
+
+      }
+
+      function smoothWater() {
+
+        var currentRenderTarget = gpuCompute.getCurrentRenderTarget( heightmapVariable );
+        var alternateRenderTarget = gpuCompute.getAlternateRenderTarget( heightmapVariable );
+
+        for ( var i = 0; i < 10; i ++ ) {
+
+          smoothShader.uniforms[ "texture" ].value = currentRenderTarget.texture;
+          gpuCompute.doRenderTarget( smoothShader, alternateRenderTarget );
+
+          smoothShader.uniforms[ "texture" ].value = alternateRenderTarget.texture;
+          gpuCompute.doRenderTarget( smoothShader, currentRenderTarget );
+
+        }
+
+      }
+
+      function onWindowResize() {
+
+        camera.aspect = window.innerWidth / window.innerHeight * viz_scaler ;
+        camera.fov = calculateFov();
+        camera.updateProjectionMatrix();
+
+        renderer.setSize( window.innerWidth, window.innerHeight );
+
+        //this is to deal with any sidebar that might be there
+        document.getElementById("SurfaceTension").childNodes.item("canvas").style.width = "100%";
+
+      }
+
+      function setMouseCoords( x, y ) {
+        mouseCoords.set( ( x / renderer.domElement.clientWidth ) * 2 - 1, - ( y / renderer.domElement.clientHeight ) * 2 + 1 );
+
+        mouseMoved = true;
+
+      }
+
+      function animate() {
+
+        requestAnimationFrame( animate );
+
+        render();
+        stats.update();
+
+      }
+
+      function render() {
+
+        // Set uniforms: mouse interaction
+        var uniforms = heightmapVariable.material.uniforms;
+        if ( mouseMoved ) {
+
+          raycaster.setFromCamera( mouseCoords, camera );
+
+          var intersects = raycaster.intersectObject( meshRay );
+
+          if ( intersects.length > 0 ) {
+            var point = intersects[ 0 ].point;
+            uniforms[ "mousePos" ].value.set( point.x, point.z );
+
+          } else {
+
+            uniforms[ "mousePos" ].value.set( 10000, 10000 );
+
+          }
+
+          mouseMoved = false;
+
+        } else {
+
+          var point = move_point;
+          if (point != undefined) {
+            uniforms[ "mousePos" ].value.set( point.x, point.z );
+          }
+
+
+        }
+
+        // Do the gpu computation
+        gpuCompute.compute();
+
+        // Get compute output in custom uniform
+        waterUniforms[ "heightmap" ].value = gpuCompute.getCurrentRenderTarget( heightmapVariable ).texture;
+
+        // Render
+        renderer.render( scene, camera );
+
+      }
+
+
+      //D3 Map Projection
+
+      var width = 960; //set the projection dimensions
+      var height = 600;
+
+      var projection = d3.geo.albersUsa()
+      .scale([d3_scaler])
+      .translate([width/2, height/2]);
+      //end of D3 stuff
+      
+      // Test if data has already been downloaded today. If it has, load data from local storage. If it has not, fetch today's data from the USGS service. If an error occurs, fall back to load data from local file
+      if (
+        localStorage.getItem('storageDate') === new Date().toLocaleDateString()
+      ) {
+        // Parse the data contained in local storage (data fetched earlier today) and pass on to visualization steps
+        let parsedData = Papa.parse(localStorage.getItem('todaysData'))
+        visualizeData(parsedData, `cached (${localStorage.getItem('storageDate')})`)
+      } else {
+        // Fetch the data from USGS service
+        fetch('https://waterwatch.usgs.gov/webservices/realtime?format=csv')
+          .then(response => response.text())
+          .then(data => {
+            // Store dataset as string in Local Storage
+            localStorage.setItem('todaysData', data)
+            // Store date of fetch to later test against last fetch
+            localStorage.setItem('storageDate', new Date().toLocaleDateString())
+            
+            // Parse the data and pass on to visualization steps
+            let parsedData = Papa.parse(data)
+            visualizeData(parsedData, `realtime (${localStorage.getItem('storageDate')})`)
+          })
+          .catch(error => {
+            console.log('Failed to load USGS data via URL, and there is no file in local storage. Loading cached dataset: realtime-streamflow-2019-07-25.csv')
+
+            // Parse locally stored file and pass to visualization steps
+            Papa.parse('data/realtime-streamflow-2019-07-25.csv', {
+              complete: function(parsedData) {
+                visualizeData(parsedData.data, 'archived (7/27/2019)')
+              }
+            })
+          })
+      }
+
+      function visualizeData(results, source) {
+          console.log("Loaded:", source, "data from", results.data.length, "USGS stations")
+          document.getElementById('loader').style.display = 'none'
+
+          //Filter out noncontiguous US places Hawaii, Pureto Rico, and Alaska because we are showing a less abstract continental map vs just USA, and these places don't really appear in this map
+          function non_contiguous_land_filter(value) {
+            var filtered_states =  [", AK", " AK", ", PR", " PR", ", HI", " HI"]; //only commas 202 are removed. if non comma filters are included, 549 are removed. Out of the 347 extra, how many are false positives? adding the slice(-4) to check only the ending part of site desciption for state abbreviation I get 327 filtered out, so 222 false positives restored by using slice
+            for (var i = 0; i < filtered_states.length; i++) {
+              if (value[1] == undefined) return false;
+              if (value[1].slice(-4).indexOf(filtered_states[i]) > -1) return false;
+            }
+            return true;
+          }
+          let the_data = {"data": results.data.filter(non_contiguous_land_filter)};
+
+          var streamflow_column;
+          var streamflow_column_name;
+
+          //white list for data columns
+          if (["percentile", "class", "stage", "flow", "percent_median", "percent_mean"].includes(streamflow_column_name)) {
+            streamflow_column_name = get_url_params("streamflow_column_name");
+            streamflow_column = the_data.data[0].indexOf(streamflow_column_name);
+          } else {
+            //default values if nothing is provided in the url parameters
+            streamflow_column = 13;
+            streamflow_column_name = "percentile";
+          }
+
+          var sorting_column;
+          var sorting_column_name;
+
+          //sorting whitelist site_no, dec_lat_va, dec_long_va, huc_cd, flow, stage, class, percentile, percent_median, percent_mean
+          var sorting_whitelist = ["site_no", "dec_lat_va", "dec_long_va", "huc_cd", "flow", "stage", "class", "percentile", "percent_median", "percent_mean"];
+
+          if (sorting_whitelist.includes(get_url_params("sorting"))) {
+            sorting_column_name = get_url_params("sorting");
+            sorting_column = the_data.data[0].indexOf(sorting_column_name);
+          }
+
+
+          function percentile_filter(value) {
+            if (value[streamflow_column].indexOf(" ") == 0) return false; //filter empty columns
+            return true;
+          }
+
+          if (streamflow_column_name == "percentile") the_data = {"data": the_data.data.filter(percentile_filter)}
+
+          function Sorter(a, b){
+            if (parseFloat(a[sorting_column]) < parseFloat(b[sorting_column])) return -1;
+            if (parseFloat(a[sorting_column]) > parseFloat(b[sorting_column])) return 1;
+            return 0;
+          }
+
+          if (sorting_column != undefined && sorting_column != NaN) the_data.data.sort(Sorter);
+
+
+          var column_data_max = 0.0; //if using something other than percentile (which is already 0-100), we need to figure out comparative percentage (e.g. of stage so need stage max)
+          var column_data_min = 0.0;
+          for (var i=1; i<the_data.data.length; i++) {
+            column_data_max = parseFloat(the_data.data[i][streamflow_column]) > column_data_max ? the_data.data[i][streamflow_column] : column_data_max;
+
+            column_data_min = parseFloat(the_data.data[i][streamflow_column]) < column_data_min ? the_data.data[i][streamflow_column] : column_data_min;
+          }
+
+
+          //Logarithmic scaling
+          var logsl = new LogSlider({minval: column_data_min, maxval: column_data_max});
+          var the_count = 0;
+          var data_point = the_count;
+
+          the_blobulator = function(){
+
+            if (sorting_column != undefined && sorting_column != NaN) {
+              if (the_count >= the_data.data.length-1) {
+                the_count = 1;
+              } else {
+                the_count+=1;
+              }
+              data_point = the_count;
+
+            } else {
+              data_point = 1 + parseInt(Math.random()*(the_data.data.length-1)); //random data points excluding element 0 which are columns in the csv
+            }
+            var coords = projection([the_data.data[data_point][3],the_data.data[data_point][2]]);
+
+            if (coords != null && !isNaN(parseFloat(the_data.data[data_point][streamflow_column])) &&     parseFloat(the_data.data[data_point][streamflow_column]) != 0) {
+              var coordies = [];
+              coordies[0] = convertRange(coords[0], [0, width], [(BOUNDS/2-BOUNDS), BOUNDS/2]);
+              coordies[1] = convertRange(coords[1], [0, height], [(BOUNDS/2-BOUNDS)/(width/height), BOUNDS/2/(width/height)]);
+
+              var new_blobby = logsl.logar(convertRange(parseFloat(the_data.data[data_point][streamflow_column]),[column_data_min, column_data_max], [0.0, 85.0]));
+
+              if (get_url_params("scaling") == "highpass") {
+                //highpass conversion
+                new_blobby = parseFloat(the_data.data[data_point][streamflow_column])/column_data_max * 100.0;//80.0 + 20;
+              }
+              if (get_url_params("scaling") == "full_range") {
+                //true range conversion
+                new_blobby = convertRange(parseFloat(the_data.data[data_point][streamflow_column]),[column_data_min, column_data_max], [0.0, 100.0]);
+              }
+
+
+              if (coordies != null) {
+
+                if (new_blobby != undefined && new_blobby != null && !isNaN(new_blobby) && new_blobby >= 0.0) valuesChanger(new_blobby);
+                move_point = {x:coordies[0],z:coordies[1]}
+
+              }
+            } else {
+              valuesChanger(0);
+              move_point = {x:10000,z:10000}
+            }
+
+
+          }
+          var bubbler_speed = 50;
+          if (sorting_column != undefined && sorting_column != NaN) bubbler_speed = 1;
+          var bubbler = setInterval(the_blobulator, bubbler_speed)
+
+          function convertRange( value, r1, r2 ) {
+            return ( value - r1[ 0 ] ) * ( r2[ 1 ] - r2[ 0 ] ) / ( r1[ 1 ] - r1[ 0 ] ) + r2[ 0 ];
+          }
+        }
+
+      if (get_url_params("sidebar")==undefined || get_url_params("sidebar")=="") {
+
+        var bylineDiv = document.createElement('div');
+        bylineDiv.setAttribute("id", "byline");
+        document.getElementById("SurfaceTension").appendChild(bylineDiv);
+
+        var byline = document.createElement('a');
+
+        var bylineText = document.createTextNode("caitlinandmisha.com/");
+
+        byline.appendChild(bylineText);
+        if (get_url_params("map") != undefined && get_url_params("map") != "" && get_url_params("map")=="false") {
+          byline.appendChild(document.createElement("br"));
+          byline.style.fontSize = ".6em";
+        }
+
+        byline.appendChild(document.createTextNode("surface-tension"))
+
+
+        byline.title = "Information about Surface Tension (variant)";
+        byline.href = "https://caitlinandmisha.com/surface-tension";
+
+        document.getElementById("byline").appendChild(byline);
+      }
+      </script>
+      <div id="meta">
+
+        <h1>Surface Tension</h1>
+        <h3>by Caitlin & Misha</h3>
+        <p>
+          This visualization maps streamflow data from the United States Geological Survey in real time across the US. Water supports life but can also drown and destroy. People are mostly water, but the melting ice caps threaten our very existence. Harnessing this elemental force requires a balancing act and this artwork is a reflection on humanity's fraught relationship with freshwater.
+        </p>
+        <p>
+          Special thanks to NC State Libraries, the Immersive Scholar Residency, the Andrew W. Mellon Foundation, and the Raleigh USGS.
+        </p>
+        <p class="padded-p">
+          <a href="https://caitlinandmisha.com" title="Caitlin & Misha Homepage">caitlinandmisha.com/surface-tension</a>
+        </p>
+
+        <div id="im_logo">
+          <img src="img/Imm-Sch-Logo-White.png">
+        </div>
+
+        <ul>
+          <li><a href="https://www.lib.ncsu.edu/" title="NC State Libraries">lib.ncsu.edu</a></li>
+          <li><a href="https://www.immersivescholar.org/" title="Immersive Scholar">immersivescholar.org</a></li>
+          <li><a href="https://www.usgs.gov/" title="USGS">usgs.gov</a></li>
+        </ul>
+
+    <script>
+    if (get_url_params("sidebar")!=undefined && get_url_params("sidebar")!="") {
+      //sideboar with text to show meta info
+      var sidebarsize = parseFloat(get_url_params("sidebar"));
+      if (sidebarsize <= 0 || sidebarsize >= 100) {
+        console.error("Sidebar width must be above 0 and below 100 (percent)");
+        //sidebar is too small or too big
+      } else {
+        document.getElementById("meta").style.display = "block";
+      }
+
+    }
+    </script>
+
+
+      </div>
+    </body>
+    </html>

@@ -1,4 +1,4 @@
-# Surface Tension
+# Surface Tension (Static Site Version)
 
 ## Artistic visualization of humanity's fraught relationship with freshwater by Caitlin &amp; Misha for the Immersive Scholar residency at the NC State Univeristy Libraries**
 
@@ -33,16 +33,12 @@ The size of the blobs on the map represent increases in 'percentile' of streamfl
 
 ## Installation Instructions
 
-There are two methods for running Surface Tension on a local machine: 1) using a local PHP server or 2) using VirtualBox and Vagrant to run a packaged version in a virtual environment. If you already have PHP installed we recommend using the local PHP server method. If not, we recommend using VirtualBox and Vagrant.
+Follow theses steps to run Surface Tension (Static Site Version) locally:
 
-### Run using local PHP server
-
-Install [PHP](https://www.php.net/downloads.php). In a terminal application do the following:
-
-Clone the repository
+Clone the surface-tension repository and checkout the static-site branch
 
 ```sh
-git clone git@github.com:immersive-scholar/surface-tension
+git clone -b static-site git@github.com:immersive-scholar/surface-tension
 ```
 
 Enter the surface-tension directory
@@ -51,49 +47,19 @@ Enter the surface-tension directory
 cd surface-tension
 ```
 
-Start a local PHP server
+Start a local server (see [How do you set up a local testing server?](https://developer.mozilla.org/en-US/docs/Learn/Common_questions/set_up_a_local_testing_server) for instructions on running a local server with Python 3)
 
 ```sh
-php -S localhost:8080
+python3 -m http.server 8080
 ```
 
 Visit <http://localhost:8080> in a browser to view the live project.
 
-### Run using VirtualBox and Vagrant
+### Data Caching (browser Local Storage)
 
-Install [VirtualBox](https://www.virtualbox.org/) and [Vagrant](https://www.vagrantup.com). In a terminal application do the following:
+In contrast to the full Surface Tension application the Static Site Version does not use a PHP script to cache USGS streamflow data and provide it to viz.html for display. See [Data Caching](https://github.com/immersive-scholar/surface-tension#data-caching) from the documentation for the full Surface Tension application.
 
-Clone the repository
-
-```sh
-git clone git@github.com:immersive-scholar/surface-tension
-```
-
-Enter the surface-tension directory
-
-```sh
-cd surface-tension
-```
-
-Build the environment
-
-```sh
-vagrant up
-```
-
-_If you receive a message when running `vagrant up` indicating "Plugin vagrant-sshfs is not installed", install it by running:_
-
-```sh
-vagrant plugin install vagrant-sshfs
-```
-
-Once the environment is built, visit <http://localhost:8080> in a browser to view the live project.
-
-### Data Caching
-
-Surface Tension consists of a PHP script index.php and a JavaScript-powered html page viz.html. The PHP script's role is to cache USGS streamflow data and provide it to viz.html for display. We first began working on this during the last Government Shutdown and saw warnings about a 'lapse in appropriations' on the USGS websites. This scared us into realizing that as much as data is made available, we shouldn't take it for granted (also in solidarity with initiatives such as [DataRefuge](https://www.datarefuge.org)).
-
-The PHP script sees if data for today has been cached in app/data already. If not, it downloads the data from USGS using curl. If there is some problem, it looks in app/data for previously downloaded data instead. Once it figures out the path to the data, it redirects to the viz.html and passes the path to the data file via query string parameter. Viz.html can take other query string parameters besides 'data'. In order to create one consistent interface to the visualization, the PHP can also forward these other parameters to viz.html
+Instead of caching files onto the server, this Static Site Version uses the Web Storage API to store data in the browser cache. The first time the application is accessed on a specific day, remote data will be fetched from the USGS streamflow API and cached. If the application is later accessed in the same day, in the same browser, the application loads the cached version. This pattern is followed each day the application is accessed. If there is some problem in loading the remote data and there is no cached data, an archived file in app/data is loaded instead.
 
 ### Options
 
