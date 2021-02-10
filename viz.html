@@ -39,7 +39,7 @@
 </head>
 <body>
 
-  <script src="../build/three.js"></script>
+  <script src="lib/three.min.js"></script>
   <script src="js/WebGL.js"></script>
   <script src="js/libs/stats.min.js"></script>
   <script src="js/controls/OrbitControls.js"></script>
@@ -761,15 +761,41 @@
       .scale([d3_scaler])
       .translate([width/2, height/2]);
       //end of D3 stuff
+      
+      // Test if data has already been downloaded today. If it has, load data from local storage. If it has not, fetch today's data from the USGS service. If an error occurs, fall back to load data from local file
+      if (
+        localStorage.getItem('storageDate') === new Date().toLocaleDateString()
+      ) {
+        // Parse the data contained in local storage (data fetched earlier today) and pass on to visualization steps
+        let parsedData = Papa.parse(localStorage.getItem('todaysData'))
+        visualizeData(parsedData)
+      } else {
+        // Fetch the data from USGS service
+        fetch('https://waterwatch.usgs.gov/webservices/realtime?format=csv')
+          .then(response => response.text())
+          .then(data => {
+            // Store dataset as string in Local Storage
+            localStorage.setItem('todaysData', data)
+            // Store date of fetch to later test against last fetch
+            localStorage.setItem('storageDate', new Date().toLocaleDateString())
+            
+            // Parse the data and pass on to visualization steps
+            let parsedData = Papa.parse(data)
+            visualizeData(parsedData)
+          })
+          .catch(error => {
+            console.log('Failed to load USGS data via URL, and there is no file in local storage. Loading cached dataset: realtime-streamflow-2019-07-25.csv')
 
-      var file = get_url_params("data");
-      if (file == undefined)  var file = "data/uscitiesv1.4.csv";//"data/us_states.csv";
+            // Parse locally stored file and pass to visualization steps
+            Papa.parse('data/realtime-streamflow-2019-07-25.csv', {
+              complete: function(parsedData) {
+                visualizeData(parsedData.data)
+              }
+            })
+          })
+      }
 
-      var the_data;
-
-      Papa.parse(file, {
-        download: true,
-        complete: function(results){
+      function visualizeData(results) {
           console.log("Loaded: data from", results.data.length, "USGS stations")
 
           //Filter out noncontiguous US places Hawaii, Pureto Rico, and Alaska because we are showing a less abstract continental map vs just USA, and these places don't really appear in this map
@@ -781,7 +807,7 @@
             }
             return true;
           }
-          the_data = {"data": results.data.filter(non_contiguous_land_filter)};
+          let the_data = {"data": results.data.filter(non_contiguous_land_filter)};
 
           var streamflow_column;
           var streamflow_column_name;
@@ -852,11 +878,6 @@
               data_point = 1 + parseInt(Math.random()*(the_data.data.length-1)); //random data points excluding element 0 which are columns in the csv
             }
             var coords = projection([the_data.data[data_point][3],the_data.data[data_point][2]]);
-            //cities data
-            if (file == "data/uscitiesv1.4.csv") {
-              var coords = projection([the_data.data[data_point][7],the_data.data[data_point][6]]);
-              //states data //var coords = projection([the_data.data[data_point][2],the_data.data[data_point][1]]);
-            }
 
             if (coords != null && !isNaN(parseFloat(the_data.data[data_point][streamflow_column])) &&     parseFloat(the_data.data[data_point][streamflow_column]) != 0) {
               var coordies = [];
@@ -891,12 +912,11 @@
           var bubbler_speed = 50;
           if (sorting_column != undefined && sorting_column != NaN) bubbler_speed = 1;
           var bubbler = setInterval(the_blobulator, bubbler_speed)
-        }
-      });
 
-      function convertRange( value, r1, r2 ) {
-        return ( value - r1[ 0 ] ) * ( r2[ 1 ] - r2[ 0 ] ) / ( r1[ 1 ] - r1[ 0 ] ) + r2[ 0 ];
-      }
+          function convertRange( value, r1, r2 ) {
+            return ( value - r1[ 0 ] ) * ( r2[ 1 ] - r2[ 0 ] ) / ( r1[ 1 ] - r1[ 0 ] ) + r2[ 0 ];
+          }
+        }
 
       if (get_url_params("sidebar")==undefined || get_url_params("sidebar")=="") {
 
