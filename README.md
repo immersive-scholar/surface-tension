@@ -1,6 +1,6 @@
 # Surface Tension (Static Site Version)
 
-## Artistic visualization of humanity's fraught relationship with freshwater by Caitlin &amp; Misha for the Immersive Scholar residency at the NC State Univeristy Libraries**
+## Artistic visualization of humanity's fraught relationship with freshwater by Caitlin &amp; Misha for the Immersive Scholar residency at the NC State Univeristy Libraries
 
 ![Image of Surface Tension](https://caitlinandmisha.com/wp-content/uploads/2019/04/Surface-Tension-screenshot.jpg)
 
@@ -22,7 +22,7 @@ The size of the blobs on the map represent increases in 'percentile' of streamfl
 
 1. **Display type**: The project runs on large format displays as well as a laptop, tablet, or phone.
 1. **Display size**: The project should run on any size and aspect display.
-1. **Processing power and memory size**: See [Options](### Options) for some considerations with regard to performance.
+1. **Processing power and memory size**: See [Options](###options) for some considerations with regard to performance.
 1. **Connectivity**: The project can be run locally after [installation](##-Installation-Instructions) or run using the online hosted version at [surface-tension.caitlinandmisha.com](http://surface-tension.caitlinandmisha.com)
 1. **Input devices**: This project does not have any input controls
 
