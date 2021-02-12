@@ -1,6 +1,6 @@
 # Surface Tension (Static Site Version)
 
-## Artistic visualization of humanity's fraught relationship with freshwater by Caitlin &amp; Misha for the Immersive Scholar residency at the NC State Univeristy Libraries
+## Artistic visualization of humanity's fraught relationship with freshwater by Caitlin &amp; Misha for the Immersive Scholar residency at the NC State University Libraries
 
 ![Image of Surface Tension](https://caitlinandmisha.com/wp-content/uploads/2019/04/Surface-Tension-screenshot.jpg)
 
