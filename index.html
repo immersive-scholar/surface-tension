@@ -765,179 +765,186 @@
       .translate([width/2, height/2]);
       //end of D3 stuff
       
+      // Fetch data function
+      const fetchDataFrom = (source) => fetch(source)
+        .then(response => {
+          if (!response.ok) {
+            throw Error(response.statusText)
+          }
+          return response
+        })
+        .then(response => response.text())
+
       // Test if data has already been downloaded today. If it has, load data from local storage. If it has not, fetch today's data from the USGS service. If an error occurs, fall back to load data from local file
       if (
         localStorage.getItem('storageDate') === new Date().toLocaleDateString()
       ) {
-        // Parse the data contained in local storage (data fetched earlier today) and pass on to visualization steps
-        let parsedData = Papa.parse(localStorage.getItem('todaysData'))
+        // Visualize data cached today
         visualizeData(
-          parsedData, `cached (${localStorage.getItem('storageDate')})`)
+          localStorage.getItem('storageData'),
+          `cached today (${localStorage.getItem('storageDate')})`
+        )
       } else {
         // Fetch the data from USGS service
-        fetch('https://waterwatch.usgs.gov/webservices/realtime?format=csv')
-          .then(handleFetchError)
-          .then(response => response.text())
+        fetchDataFrom(
+          'https://waterwatch.usgs.gov/webservices/realtime?format=csv'
+        )
           .then(data => {
             // Store dataset as string in Local Storage
-            localStorage.setItem('todaysData', data)
+            localStorage.setItem('storageData', data)
             // Store date of fetch to later test against last fetch
             localStorage.setItem('storageDate', new Date().toLocaleDateString())
             
-            // Parse the data and pass on to visualization steps
-            let parsedData = Papa.parse(data)
-            visualizeData(parsedData, `realtime (${localStorage.getItem('storageDate')})`)
+            // Visualize real-time data
+            visualizeData(
+              data,
+              `real-time (${localStorage.getItem('storageDate')})`
+            )
           })
           .catch(error => {
-            if (!localStorage.getItem('storageDate')) {
-              console.log('Failed to load USGS data via URL, and there is no file in local storage. Loading cached dataset: realtime-streamflow-2019-07-25.csv')
-              
+            // Test if a dataset is cached, if not load local csv file else load 'archived' browser cached data
+            if (!localStorage.getItem('storageData')) {
               // Load locally stored csv file
-              fetch('./data/realtime-streamflow-2021-02-12.csv')
-                .then(response => response.text())
+              fetchDataFrom('./data/realtime-streamflow-2021-02-12.csv')
                 .then(data => {
-                  // Parse the data and pass on to visualization steps
-                  let parsedData = Papa.parse(data)
-                  visualizeData(parsedData, 'archived (2021-02-12)')
-                })
+                  // Visualize archived data
+                  visualizeData(data, 'archived (2021-02-12)')
+                }).catch(error => console.log(error))
             } else {
-              let parsedData = Papa.parse(localStorage.getItem('todaysData'))
+              // Visualize archived cached data
               visualizeData(
-                parsedData, `cached (${localStorage.getItem('storageDate')})`)
+                localStorage.getItem('storageData'),
+                `cached archive (${localStorage.getItem('storageDate')})`
+              )
             }
           })
       }
 
-      function handleFetchError(response) {
-        if (!response.ok) {
-          throw Error(response.statusText)
-        }
-        return response
-      }
+      function visualizeData(data, source) {
+        // Parse the data with Papa Parse
+        let results = Papa.parse(data)
+        console.log("Loaded:", source, "data from", results.data.length, "USGS stations")
+        document.getElementById('loader').style.display = 'none'
 
-      function visualizeData(results, source) {
-          console.log("Loaded:", source, "data from", results.data.length, "USGS stations")
-          document.getElementById('loader').style.display = 'none'
-
-          //Filter out noncontiguous US places Hawaii, Pureto Rico, and Alaska because we are showing a less abstract continental map vs just USA, and these places don't really appear in this map
-          function non_contiguous_land_filter(value) {
-            var filtered_states =  [", AK", " AK", ", PR", " PR", ", HI", " HI"]; //only commas 202 are removed. if non comma filters are included, 549 are removed. Out of the 347 extra, how many are false positives? adding the slice(-4) to check only the ending part of site desciption for state abbreviation I get 327 filtered out, so 222 false positives restored by using slice
-            for (var i = 0; i < filtered_states.length; i++) {
-              if (value[1] == undefined) return false;
-              if (value[1].slice(-4).indexOf(filtered_states[i]) > -1) return false;
-            }
-            return true;
+        //Filter out noncontiguous US places Hawaii, Pureto Rico, and Alaska because we are showing a less abstract continental map vs just USA, and these places don't really appear in this map
+        function non_contiguous_land_filter(value) {
+          var filtered_states =  [", AK", " AK", ", PR", " PR", ", HI", " HI"]; //only commas 202 are removed. if non comma filters are included, 549 are removed. Out of the 347 extra, how many are false positives? adding the slice(-4) to check only the ending part of site desciption for state abbreviation I get 327 filtered out, so 222 false positives restored by using slice
+          for (var i = 0; i < filtered_states.length; i++) {
+            if (value[1] == undefined) return false;
+            if (value[1].slice(-4).indexOf(filtered_states[i]) > -1) return false;
           }
-          let the_data = {"data": results.data.filter(non_contiguous_land_filter)};
+          return true;
+        }
+        let the_data = {"data": results.data.filter(non_contiguous_land_filter)};
 
-          var streamflow_column;
-          var streamflow_column_name;
+        var streamflow_column;
+        var streamflow_column_name;
 
-          //white list for data columns
-          if (["percentile", "class", "stage", "flow", "percent_median", "percent_mean"].includes(streamflow_column_name)) {
-            streamflow_column_name = get_url_params("streamflow_column_name");
-            streamflow_column = the_data.data[0].indexOf(streamflow_column_name);
+        //white list for data columns
+        if (["percentile", "class", "stage", "flow", "percent_median", "percent_mean"].includes(streamflow_column_name)) {
+          streamflow_column_name = get_url_params("streamflow_column_name");
+          streamflow_column = the_data.data[0].indexOf(streamflow_column_name);
+        } else {
+          //default values if nothing is provided in the url parameters
+          streamflow_column = 13;
+          streamflow_column_name = "percentile";
+        }
+
+        var sorting_column;
+        var sorting_column_name;
+
+        //sorting whitelist site_no, dec_lat_va, dec_long_va, huc_cd, flow, stage, class, percentile, percent_median, percent_mean
+        var sorting_whitelist = ["site_no", "dec_lat_va", "dec_long_va", "huc_cd", "flow", "stage", "class", "percentile", "percent_median", "percent_mean"];
+
+        if (sorting_whitelist.includes(get_url_params("sorting"))) {
+          sorting_column_name = get_url_params("sorting");
+          sorting_column = the_data.data[0].indexOf(sorting_column_name);
+        }
+
+
+        function percentile_filter(value) {
+          if (value[streamflow_column].indexOf(" ") == 0) return false; //filter empty columns
+          return true;
+        }
+
+        if (streamflow_column_name == "percentile") the_data = {"data": the_data.data.filter(percentile_filter)}
+
+        function Sorter(a, b){
+          if (parseFloat(a[sorting_column]) < parseFloat(b[sorting_column])) return -1;
+          if (parseFloat(a[sorting_column]) > parseFloat(b[sorting_column])) return 1;
+          return 0;
+        }
+
+        if (sorting_column != undefined && sorting_column != NaN) the_data.data.sort(Sorter);
+
+
+        var column_data_max = 0.0; //if using something other than percentile (which is already 0-100), we need to figure out comparative percentage (e.g. of stage so need stage max)
+        var column_data_min = 0.0;
+        for (var i=1; i<the_data.data.length; i++) {
+          column_data_max = parseFloat(the_data.data[i][streamflow_column]) > column_data_max ? the_data.data[i][streamflow_column] : column_data_max;
+
+          column_data_min = parseFloat(the_data.data[i][streamflow_column]) < column_data_min ? the_data.data[i][streamflow_column] : column_data_min;
+        }
+
+
+        //Logarithmic scaling
+        var logsl = new LogSlider({minval: column_data_min, maxval: column_data_max});
+        var the_count = 0;
+        var data_point = the_count;
+
+        the_blobulator = function(){
+
+          if (sorting_column != undefined && sorting_column != NaN) {
+            if (the_count >= the_data.data.length-1) {
+              the_count = 1;
+            } else {
+              the_count+=1;
+            }
+            data_point = the_count;
+
           } else {
-            //default values if nothing is provided in the url parameters
-            streamflow_column = 13;
-            streamflow_column_name = "percentile";
+            data_point = 1 + parseInt(Math.random()*(the_data.data.length-1)); //random data points excluding element 0 which are columns in the csv
           }
+          var coords = projection([the_data.data[data_point][3],the_data.data[data_point][2]]);
 
-          var sorting_column;
-          var sorting_column_name;
+          if (coords != null && !isNaN(parseFloat(the_data.data[data_point][streamflow_column])) &&     parseFloat(the_data.data[data_point][streamflow_column]) != 0) {
+            var coordies = [];
+            coordies[0] = convertRange(coords[0], [0, width], [(BOUNDS/2-BOUNDS), BOUNDS/2]);
+            coordies[1] = convertRange(coords[1], [0, height], [(BOUNDS/2-BOUNDS)/(width/height), BOUNDS/2/(width/height)]);
 
-          //sorting whitelist site_no, dec_lat_va, dec_long_va, huc_cd, flow, stage, class, percentile, percent_median, percent_mean
-          var sorting_whitelist = ["site_no", "dec_lat_va", "dec_long_va", "huc_cd", "flow", "stage", "class", "percentile", "percent_median", "percent_mean"];
+            var new_blobby = logsl.logar(convertRange(parseFloat(the_data.data[data_point][streamflow_column]),[column_data_min, column_data_max], [0.0, 85.0]));
 
-          if (sorting_whitelist.includes(get_url_params("sorting"))) {
-            sorting_column_name = get_url_params("sorting");
-            sorting_column = the_data.data[0].indexOf(sorting_column_name);
-          }
-
-
-          function percentile_filter(value) {
-            if (value[streamflow_column].indexOf(" ") == 0) return false; //filter empty columns
-            return true;
-          }
-
-          if (streamflow_column_name == "percentile") the_data = {"data": the_data.data.filter(percentile_filter)}
-
-          function Sorter(a, b){
-            if (parseFloat(a[sorting_column]) < parseFloat(b[sorting_column])) return -1;
-            if (parseFloat(a[sorting_column]) > parseFloat(b[sorting_column])) return 1;
-            return 0;
-          }
-
-          if (sorting_column != undefined && sorting_column != NaN) the_data.data.sort(Sorter);
-
-
-          var column_data_max = 0.0; //if using something other than percentile (which is already 0-100), we need to figure out comparative percentage (e.g. of stage so need stage max)
-          var column_data_min = 0.0;
-          for (var i=1; i<the_data.data.length; i++) {
-            column_data_max = parseFloat(the_data.data[i][streamflow_column]) > column_data_max ? the_data.data[i][streamflow_column] : column_data_max;
-
-            column_data_min = parseFloat(the_data.data[i][streamflow_column]) < column_data_min ? the_data.data[i][streamflow_column] : column_data_min;
-          }
-
-
-          //Logarithmic scaling
-          var logsl = new LogSlider({minval: column_data_min, maxval: column_data_max});
-          var the_count = 0;
-          var data_point = the_count;
-
-          the_blobulator = function(){
-
-            if (sorting_column != undefined && sorting_column != NaN) {
-              if (the_count >= the_data.data.length-1) {
-                the_count = 1;
-              } else {
-                the_count+=1;
-              }
-              data_point = the_count;
-
-            } else {
-              data_point = 1 + parseInt(Math.random()*(the_data.data.length-1)); //random data points excluding element 0 which are columns in the csv
+            if (get_url_params("scaling") == "highpass") {
+              //highpass conversion
+              new_blobby = parseFloat(the_data.data[data_point][streamflow_column])/column_data_max * 100.0;//80.0 + 20;
             }
-            var coords = projection([the_data.data[data_point][3],the_data.data[data_point][2]]);
-
-            if (coords != null && !isNaN(parseFloat(the_data.data[data_point][streamflow_column])) &&     parseFloat(the_data.data[data_point][streamflow_column]) != 0) {
-              var coordies = [];
-              coordies[0] = convertRange(coords[0], [0, width], [(BOUNDS/2-BOUNDS), BOUNDS/2]);
-              coordies[1] = convertRange(coords[1], [0, height], [(BOUNDS/2-BOUNDS)/(width/height), BOUNDS/2/(width/height)]);
-
-              var new_blobby = logsl.logar(convertRange(parseFloat(the_data.data[data_point][streamflow_column]),[column_data_min, column_data_max], [0.0, 85.0]));
-
-              if (get_url_params("scaling") == "highpass") {
-                //highpass conversion
-                new_blobby = parseFloat(the_data.data[data_point][streamflow_column])/column_data_max * 100.0;//80.0 + 20;
-              }
-              if (get_url_params("scaling") == "full_range") {
-                //true range conversion
-                new_blobby = convertRange(parseFloat(the_data.data[data_point][streamflow_column]),[column_data_min, column_data_max], [0.0, 100.0]);
-              }
-
-
-              if (coordies != null) {
-
-                if (new_blobby != undefined && new_blobby != null && !isNaN(new_blobby) && new_blobby >= 0.0) valuesChanger(new_blobby);
-                move_point = {x:coordies[0],z:coordies[1]}
-
-              }
-            } else {
-              valuesChanger(0);
-              move_point = {x:10000,z:10000}
+            if (get_url_params("scaling") == "full_range") {
+              //true range conversion
+              new_blobby = convertRange(parseFloat(the_data.data[data_point][streamflow_column]),[column_data_min, column_data_max], [0.0, 100.0]);
             }
 
 
-          }
-          var bubbler_speed = 50;
-          if (sorting_column != undefined && sorting_column != NaN) bubbler_speed = 1;
-          var bubbler = setInterval(the_blobulator, bubbler_speed)
+            if (coordies != null) {
 
-          function convertRange( value, r1, r2 ) {
-            return ( value - r1[ 0 ] ) * ( r2[ 1 ] - r2[ 0 ] ) / ( r1[ 1 ] - r1[ 0 ] ) + r2[ 0 ];
+              if (new_blobby != undefined && new_blobby != null && !isNaN(new_blobby) && new_blobby >= 0.0) valuesChanger(new_blobby);
+              move_point = {x:coordies[0],z:coordies[1]}
+
+            }
+          } else {
+            valuesChanger(0);
+            move_point = {x:10000,z:10000}
           }
+
+
         }
+        var bubbler_speed = 50;
+        if (sorting_column != undefined && sorting_column != NaN) bubbler_speed = 1;
+        var bubbler = setInterval(the_blobulator, bubbler_speed)
+
+        function convertRange( value, r1, r2 ) {
+          return ( value - r1[ 0 ] ) * ( r2[ 1 ] - r2[ 0 ] ) / ( r1[ 1 ] - r1[ 0 ] ) + r2[ 0 ];
+        }
+      }
 
       if (get_url_params("sidebar")==undefined || get_url_params("sidebar")=="") {
 
